@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>FB Creator - Facebook Account Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1877f2 0%, #0c5bd1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1877f2;
+        }
+
+        .stat-card .label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #1877f2;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1877f2;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1877f2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0c5bd1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(24,119,242,0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #42b72a;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #36a420;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #1877f2;
+            color: #1877f2;
+        }
+
+        .btn-outline:hover {
+            background: #1877f2;
+            color: white;
+        }
+
+        /* Email Display */
+        .email-display {
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .email-display span {
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Result Box */
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-box.success {
+            display: block;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-box.error {
+            display: block;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-box.loading {
+            display: block;
+            background: #e2f0ff;
+            border: 1px solid #b8daff;
+            color: #004085;
+        }
+
+        /* Account List */
+        .account-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .account-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .account-item .email {
+            font-weight: bold;
+            color: #1877f2;
+            word-break: break-all;
+        }
+
+        .account-item .password {
+            font-family: monospace;
+            color: #28a745;
+        }
+
+        .account-item .details {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .inbox-messages {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .message-subject {
+            font-weight: bold;
+            color: #1877f2;
+        }
+
+        .verification-code {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+
+        /* Donors */
+        .donors-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .donor-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1877f2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 FB Creator Pro</h1>
+            <p>Create Facebook Accounts Instantly | Powered by TempMail</p>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-card">
+                <div class="number" id="totalAccounts">0</div>
+                <div class="label">Total Accounts</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="lastHour">0</div>
+                <div class="label">Last Hour</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="lastDay">0</div>
+                <div class="label">Last 24 Hours</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="uptime">0</div>
+                <div class="label">Uptime (hours)</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left Column: Account Creation -->
+            <div>
+                <div class="card">
+                    <h2>📧 Temp Email</h2>
+                    <button class="btn btn-secondary" id="genEmailBtn">Generate Temp Email</button>
+                    <div id="emailDisplay" style="display:none;" class="email-display">
+                        <span id="emailAddress"></span>
+                        <button class="copy-btn" onclick="copyToClipboard('emailAddress')">Copy</button>
+                    </div>
+                    <div id="inboxArea" style="display:none;">
+                        <button class="btn btn-outline" id="checkInboxBtn" style="margin-top: 10px;">📬 Check Inbox</button>
+                        <div id="inboxMessages" class="inbox-messages" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 25px;">
+                    <h2>🔐 Create Facebook Account</h2>
+                    <form id="createAccountForm">
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="accEmail" placeholder="Enter email or generate one above" required>
+                        </div>
+                        <div class="form-group">
+                            <label>First Name (Optional)</label>
+                            <input type="text" id="firstName" placeholder="Auto-generated if empty">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name (Optional)</label>
+                            <input type="text" id="lastName" placeholder="Auto-generated if empty">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="gender">
+                                <option value="">Random</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="createBtn">Create Facebook Account</button>
+                    </form>
+                    <div id="createResult" class="result-box"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Accounts & Inbox -->
+            <div>
+                <div class="card">
+                    <h2>📋 Recent Accounts</h2>
+                    <div id="recentAccounts" class="account-list">
+                        <p style="color: #999; text-align: center;">No accounts created yet</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 25px;">
+                    <h2>💝 Recent Donors</h2>
+                    <div id="donorsList" class="donors-list">
+                        <p style="color: #999; text-align: center;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>⚠️ For educational purposes only. Use responsibly.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentEmail = null;
+
+        // Load dashboard stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('totalAccounts').textContent = data.data.totalAccounts;
+                    document.getElementById('lastHour').textContent = data.data.lastHour;
+                    document.getElementById('lastDay').textContent = data.data.lastDay;
+                    document.getElementById('uptime').textContent = Math.floor(data.data.uptime / 3600);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent accounts
+        async function loadRecentAccounts() {
+            try {
+                const response = await fetch('/api/accounts/recent');
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    const html = data.data.map(acc => `
+                        <div class="account-item">
+                            <div class="email">📧 ${acc.email}</div>
+                            <div class="password">🔑 ${acc.password}</div>
+                            <div class="details">
+                                ${acc.firstName} ${acc.lastName} | 
+                                ${acc.gender === 'M' ? 'Male' : 'Female'} | 
+                                ${new Date(acc.createdAt).toLocaleString()}
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('recentAccounts').innerHTML = html;
+                } else {
+                    document.getElementById('recentAccounts').innerHTML = '<p style="color: #999; text-align: center;">No accounts created yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+            }
+        }
+
+        // Load donors
+        async function loadDonors() {
+            try {
+                const response = await fetch('/api/donors');
+                const data = await response.json();
+                if (data.success) {
+                    const html = data.data.map(donor => `
+                        <div class="donor-item">
+                            <span>❤️ ${donor.name}</span>
+                            <span>$${donor.amount}</span>
+                            <span style="font-size: 0.8rem; color: #666;">${donor.time}</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('donorsList').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading donors:', error);
+            }
+        }
+
+        // Generate temp email
+        document.getElementById('genEmailBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('genEmailBtn');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            
+            try {
+                const response = await fetch('/api/tempmail/gen');
+                const data = await response.json();
+                if (data.success) {
+                    currentEmail = data.data.email;
+                    document.getElementById('emailAddress').textContent = currentEmail;
+                    document.getElementById('accEmail').value = currentEmail;
+                    document.getElementById('emailDisplay').style.display = 'flex';
+                    document.getElementById('inboxArea').style.display = 'block';
+                    document.getElementById('inboxMessages').innerHTML = '<p style="color: #999;">Click "Check Inbox" to see verification messages</p>';
+                } else {
+                    alert('Failed to generate email: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error generating email: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Temp Email';
+            }
+        });
+
+        // Check inbox
+        document.getElementById('checkInboxBtn')?.addEventListener('click', async () => {
+            if (!currentEmail) {
+                alert('Generate an email first');
+                return;
+            }
+            
+            const btn = document.getElementById('checkInboxBtn');
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            document.getElementById('inboxMessages').innerHTML = '<div class="spinner"></div> Checking inbox...';
+            
+            try {
+                const response = await fetch(`/api/tempmail/inbox?email=${encodeURIComponent(currentEmail)}`);
+                const data = await response.json();
+                if (data.success) {
+                    let html = '';
+                    if (data.data.messages.length > 0) {
+                        html = data.data.messages.map(msg => `
+                            <div class="message">
+                                <div class="message-subject">📨 ${msg.subject || 'No Subject'}</div>
+                                <div style="font-size: 0.8rem; color: #666;">From: ${msg.from || 'Unknown'}</div>
+                                <div style="margin-top: 5px;">${(msg.body_text || msg.body_html || 'No content').substring(0, 200)}...</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        html = '<p style="color: #999;">No messages yet. Complete the Facebook registration and check again.</p>';
+                    }
+                    
+                    if (data.data.verification.code) {
+                        html += `<div class="verification-code">🔐 Verification Code: <strong>${data.data.verification.code}</strong></div>`;
+                    }
+                    if (data.data.verification.link) {
+                        html += `<div class="verification-code">🔗 <a href="${data.data.verification.link}" target="_blank">Click to verify Facebook account</a></div>`;
+                    }
+                    
+                    document.getElementById('inboxMessages').innerHTML = html;
+                } else {
+                    document.getElementById('inboxMessages').innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('inboxMessages').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📬 Check Inbox';
+            }
+        });
+
+        // Create Facebook account
+        document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('accEmail').value;
+            if (!email) {
+                showResult('createResult', 'Please enter or generate an email address', 'error');
+                return;
+            }
+            
+            const createBtn = document.getElementById('createBtn');
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+            showResult('createResult', 'Creating Facebook account...', 'loading');
+            
+            const payload = {
+                email: email,
+                firstName: document.getElementById('firstName').value || undefined,
+                lastName: document.getElementById('lastName').value || undefined,
+                gender: document.getElementById('gender').value || undefined
+            };
+            
+            try {
+                const response = await fetch('/api/fbcreate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('createResult', `
+                        ✅ Account Created Successfully!<br><br>
+                        📧 Email: ${data.data.email}<br>
+                        🔑 Password: ${data.data.password}<br>
+                        👤 Name: ${data.data.firstName} ${data.data.lastName}<br>
+                        🆔 User ID: ${data.data.userId}<br>
+                        🔗 <a href="${data.data.profileLink}" target="_blank">View Profile</a>
+                    `, 'success');
+                    loadRecentAccounts();
+                    loadStats();
+                    
+                    // Auto-check inbox after account creation
+                    setTimeout(() => {
+                        if (currentEmail === email) {
+                            document.getElementById('checkInboxBtn')?.click();
+                        }
+                    }, 5000);
+                } else {
+                    showResult('createResult', `❌ Failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('createResult', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Facebook Account';
+            }
+        });
+        
+        function showResult(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = message;
+            el.className = `result-box ${type}`;
+        }
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+        
+        // Initial load
+        loadStats();
+        loadRecentAccounts();
+        loadDonors();
+        
+        // Refresh stats and accounts every 10 seconds
+        setInterval(() => {
+            loadStats();
+            loadRecentAccounts();
+        }, 10000);
+    </script>
+</body>
+</html>
