@@ -1,0 +1,24 @@
+{
+  "name": "facebook-account-creator",
+  "version": "1.0.0",
+  "description": "Facebook account creation tool with temp email",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "crypto": "^1.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["facebook", "account", "creator", "temp-mail"],
+  "author": "",
+  "license": "MIT"
+}
