@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
-const { randomInt } = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,10 +17,9 @@ app.use(express.static('public'));
 // Configuration
 const CONFIG = {
     output_dir: path.join(__dirname, 'output'),
-    facebook_reg_url: 'https://x.facebook.com/reg',
-    facebook_submit_url: 'https://www.facebook.com/reg/submit/',
-    temp_mail_api: 'https://api.internal.temp-mail.io/api/v3/email',
-    proxy_api: 'https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4&timeout=100000&country=all&ssl=all&anonymity=all'
+    facebook_reg_url: 'https://m.facebook.com/reg/',
+    facebook_submit_url: 'https://m.facebook.com/reg/submit/',
+    facebook_confirm_url: 'https://m.facebook.com/confirmemail.php'
 };
 
 // Ensure output directory exists
@@ -74,32 +72,28 @@ const surnames = [
 
 // Phone prefixes by country
 const phoneConfigs = {
-    BD: { code: '+88', prefixes: ['017', '018', '019', '016', '015', '013', '014'], length: 8 },
-    KH: { code: '+855', prefixes: ['010', '011', '012', '013', '014', '015', '016', '017', '092', '093', '097', '098', '099'], length: 6 },
-    NP: { code: '+977', prefixes: ['97', '98'], length: 8 },
-    IN: { code: '+91', prefixes: ['98', '99', '97', '96', '95', '94'], length: 8 },
-    PK: { code: '+92', prefixes: ['300', '301', '302', '303', '304', '305'], length: 7 },
-    UK: { code: '+44', prefixes: ['7400', '7500', '7600', '7700', '7800', '7900'], length: 6 },
-    PH: { code: '+63', prefixes: ['917', '918', '919', '920', '921', '922'], length: 7 },
-    ID: { code: '+62', prefixes: ['813', '815', '816', '817', '818', '819'], length: 7 },
-    OM: { code: '+968', prefixes: ['71', '72', '73', '79'], length: 6 },
-    US: { code: '+1', prefixes: ['201', '202', '303', '312', '415', '646', '718'], length: 7 },
-    NG: { code: '+234', prefixes: ['701', '703', '704', '705', '706', '707', '708', '802', '803'], length: 7 },
-    ZA: { code: '+27', prefixes: ['60', '61', '62', '63', '71', '72', '73'], length: 7 }
+    BD: { code: '88', prefixes: ['17', '18', '19', '16', '15', '13', '14'], length: 8 },
+    PH: { code: '63', prefixes: ['917', '918', '919', '920', '921', '922'], length: 7 },
+    ID: { code: '62', prefixes: ['813', '815', '816', '817', '818', '819'], length: 7 },
+    IN: { code: '91', prefixes: ['98', '99', '97', '96', '95', '94'], length: 8 },
+    PK: { code: '92', prefixes: ['300', '301', '302', '303', '304', '305'], length: 7 },
+    US: { code: '1', prefixes: ['201', '202', '303', '312', '415', '646', '718'], length: 7 }
 };
 
-// User-Agent generator
+// Generate random User-Agent
 function generateUserAgent() {
-    const androidVersions = ['10', '11', '12', '13'];
-    const chromeVersions = ['100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
+    const androidVersions = ['10', '11', '12', '13', '14'];
+    const chromeVersions = ['120', '121', '122', '123', '124'];
+    const devices = [
+        'SM-G998B', 'Pixel 7 Pro', 'OnePlus 11', 'Xiaomi 13 Pro', 
+        'OPPO Find X6', 'Realme GT 3', 'vivo X90 Pro'
+    ];
     
     const androidVer = androidVersions[Math.floor(Math.random() * androidVersions.length)];
     const chromeVer = chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
+    const device = devices[Math.floor(Math.random() * devices.length)];
     const buildVer = Math.floor(Math.random() * 9000) + 1000;
     const patchVer = Math.floor(Math.random() * 150) + 70;
-    
-    const devices = ['SM-G998B', 'Pixel 6', 'OnePlus 9 Pro', 'Xiaomi Mi 11', 'OPPO Find X3', 'Realme GT'];
-    const device = devices[Math.floor(Math.random() * devices.length)];
     
     return `Mozilla/5.0 (Linux; Android ${androidVer}; ${device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVer}.0.${buildVer}.${patchVer} Mobile Safari/537.36`;
 }
@@ -109,7 +103,7 @@ function generatePassword() {
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowercase = 'abcdefghijklmnopqrstuvwxyz';
     const numbers = '0123456789';
-    const symbols = '!@#$%^&*()_+';
+    const symbols = '!@#$%^&*';
     
     let password = '';
     password += uppercase[Math.floor(Math.random() * uppercase.length)];
@@ -126,36 +120,42 @@ function generatePassword() {
 }
 
 // Generate phone number
-function generatePhoneNumber() {
-    const countries = Object.keys(phoneConfigs);
-    const country = countries[Math.floor(Math.random() * countries.length)];
-    const config = phoneConfigs[country];
-    const prefix = config.prefixes[Math.floor(Math.random() * config.prefixes.length)];
-    
-    let number = '';
-    for (let i = 0; i < config.length; i++) {
-        number += Math.floor(Math.random() * 10);
+function generatePhoneNumber(type = 'bd') {
+    if (type === 'bd') {
+        const prefixes = ['17', '18', '19', '16', '15', '13', '14'];
+        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        let number = '';
+        for (let i = 0; i < 8; i++) {
+            number += Math.floor(Math.random() * 10);
+        }
+        return `${prefix}${number}`;
+    } else if (type === 'mixed') {
+        const countries = Object.keys(phoneConfigs);
+        const country = countries[Math.floor(Math.random() * countries.length)];
+        const config = phoneConfigs[country];
+        const prefix = config.prefixes[Math.floor(Math.random() * config.prefixes.length)];
+        let number = '';
+        for (let i = 0; i < config.length; i++) {
+            number += Math.floor(Math.random() * 10);
+        }
+        return `${prefix}${number}`;
     }
-    
-    return `${config.code}${prefix}${number}`;
-}
-
-// Generate BD phone number
-function generateBDPhone() {
-    const prefixes = ['017', '018', '019', '016', '015', '013', '014'];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    let number = '';
-    for (let i = 0; i < 8; i++) {
-        number += Math.floor(Math.random() * 10);
-    }
-    return `+88${prefix}${number}`;
+    return generateTempEmail();
 }
 
 // Generate temp email
 function generateTempEmail() {
-    const domains = ['@tempmail.com', '@temp-mail.org', '@guerrillamail.com', '@10minutemail.com'];
-    const username = crypto.randomBytes(8).toString('hex');
-    return username + domains[Math.floor(Math.random() * domains.length)];
+    const domains = ['guerrillamail.com', '10minutemail.com', 'tempmail.com'];
+    const username = crypto.randomBytes(6).toString('hex');
+    return `${username}@${domains[Math.floor(Math.random() * domains.length)]}`;
+}
+
+// Get random name
+function getRandomName() {
+    return {
+        first: firstNames[Math.floor(Math.random() * firstNames.length)],
+        last: surnames[Math.floor(Math.random() * surnames.length)]
+    };
 }
 
 // Extract form data from HTML
@@ -166,7 +166,7 @@ function extractFormData(html) {
     $('input').each((i, elem) => {
         const name = $(elem).attr('name');
         const value = $(elem).attr('value') || '';
-        if (name) {
+        if (name && !formData[name]) {
             formData[name] = value;
         }
     });
@@ -174,189 +174,183 @@ function extractFormData(html) {
     return formData;
 }
 
-// Check Facebook profile picture
-async function checkProfilePicture(uid) {
-    try {
-        const url = `https://graph.facebook.com/${uid}/picture?type=normal`;
-        const response = await axios.get(url, {
-            maxRedirects: 0,
-            validateStatus: (status) => status === 302,
-            headers: { 'User-Agent': generateUserAgent() }
-        });
-        
-        if (response.status === 302) {
-            const redirectUrl = response.headers.location || '';
-            return redirectUrl.includes('scontent');
-        }
-        return false;
-    } catch (error) {
-        return false;
-    }
+// Save account to file
+async function saveAccount(account) {
+    const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
+    const line = `${account.uid}|${account.email}|${account.password}|${account.cookies}|${new Date().toISOString()}\n`;
+    await fs.appendFile(filePath, line);
 }
 
 // Create Facebook account
-async function createFacebookAccount(emailType, password, customPassword = null) {
+async function createFacebookAccount(emailType, customPassword = null) {
     const session = axios.create({
-        headers: {
-            'User-Agent': generateUserAgent(),
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive'
-        }
+        timeout: 30000,
+        maxRedirects: 5,
+        validateStatus: status => status < 500
     });
     
     try {
-        // Get registration page
-        const regResponse = await session.get(CONFIG.facebook_reg_url);
-        const formData = extractFormData(regResponse.data);
-        
-        // Generate user data
-        const { first, last } = getRandomName();
-        const finalPassword = customPassword || generatePassword();
-        
-        // Generate email/phone based on type
-        let contact;
-        switch(emailType) {
-            case 'bd':
-                contact = generateBDPhone();
-                break;
-            case 'mixed':
-                contact = generatePhoneNumber();
-                break;
-            case 'temp':
-                contact = generateTempEmail();
-                break;
-            default:
-                contact = generateBDPhone();
-        }
-        
-        // Prepare payload
-        const payload = {
-            ccp: "2",
-            reg_instance: formData.reg_instance || "",
-            submission_request: "true",
-            reg_impression_id: formData.reg_impression_id || "",
-            ns: "1",
-            logger_id: formData.logger_id || "",
-            firstname: first,
-            lastname: last,
-            birthday_day: String(Math.floor(Math.random() * 20) + 10),
-            birthday_month: String(Math.floor(Math.random() * 12) + 1),
-            birthday_year: String(Math.floor(Math.random() * 15) + 1985),
-            reg_email__: contact,
-            sex: "1",
-            encpass: `#PWD_BROWSER:0:${Math.floor(Date.now() / 1000)}:${finalPassword}`,
-            submit: "Sign Up",
-            fb_dtsg: formData.fb_dtsg || "",
-            jazoest: formData.jazoest || "",
-            lsd: formData.lsd || ""
+        // Step 1: Get registration page and extract tokens
+        const userAgent = generateUserAgent();
+        const headers = {
+            'User-Agent': userAgent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Cache-Control': 'max-age=0'
         };
         
-        // Submit registration
-        const submitResponse = await session.post(CONFIG.facebook_submit_url, 
-            new URLSearchParams(payload).toString(),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Referer': 'https://www.facebook.com/reg/'
-                }
+        const regResponse = await session.get(CONFIG.facebook_reg_url, { headers });
+        
+        if (regResponse.status !== 200) {
+            throw new Error(`Failed to load registration page: ${regResponse.status}`);
+        }
+        
+        const formData = extractFormData(regResponse.data);
+        
+        // Step 2: Prepare registration data
+        const { first, last } = getRandomName();
+        const password = customPassword || generatePassword();
+        
+        // Generate contact based on type
+        let contact;
+        let contactType = 'email';
+        
+        if (emailType === 'temp') {
+            contact = generateTempEmail();
+            contactType = 'email';
+        } else if (emailType === 'mixed') {
+            contact = generatePhoneNumber('mixed');
+            contactType = 'phone';
+        } else {
+            contact = generatePhoneNumber('bd');
+            contactType = 'phone';
+        }
+        
+        const birthdayDay = Math.floor(Math.random() * 28) + 1;
+        const birthdayMonth = Math.floor(Math.random() * 12) + 1;
+        const birthdayYear = Math.floor(Math.random() * 15) + 1985;
+        
+        const payload = {
+            'reg_instance': formData.reg_instance || '',
+            'email': contactType === 'email' ? contact : '',
+            'phone_number': contactType === 'phone' ? contact : '',
+            'firstname': first,
+            'lastname': last,
+            'birthday_day': birthdayDay,
+            'birthday_month': birthdayMonth,
+            'birthday_year': birthdayYear,
+            'sex': '1',
+            'custom_gender': '',
+            'reg_email_confirmation_': contactType === 'email' ? contact : '',
+            'password': password,
+            'submit': 'Sign Up',
+            'lsd': formData.lsd || '',
+            'jazoest': formData.jazoest || '',
+            'm_ts': Date.now(),
+            'li': formData.li || '',
+            'reg_mail': contactType === 'email' ? contact : '',
+            'reg_phone': contactType === 'phone' ? contact : ''
+        };
+        
+        // Clean up payload (remove empty values)
+        Object.keys(payload).forEach(key => {
+            if (payload[key] === '' && key !== 'custom_gender') {
+                delete payload[key];
             }
+        });
+        
+        // Step 3: Submit registration
+        const submitHeaders = {
+            ...headers,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Origin': 'https://m.facebook.com',
+            'Referer': CONFIG.facebook_reg_url,
+            'Host': 'm.facebook.com'
+        };
+        
+        const submitResponse = await session.post(
+            CONFIG.facebook_submit_url,
+            new URLSearchParams(payload).toString(),
+            { headers: submitHeaders }
         );
         
-        // Get cookies
+        // Step 4: Check cookies for successful registration
         const cookies = session.defaults.headers.common['Cookie'] || '';
-        const cookieObj = {};
+        const cookieJar = {};
+        
         if (cookies) {
             cookies.split(';').forEach(cookie => {
                 const [key, value] = cookie.trim().split('=');
-                if (key && value) cookieObj[key] = value;
+                if (key && value) cookieJar[key] = value;
             });
         }
         
-        const uid = cookieObj.c_user;
+        // Also try to get cookies from response headers
+        if (submitResponse.headers['set-cookie']) {
+            const setCookies = submitResponse.headers['set-cookie'];
+            setCookies.forEach(cookie => {
+                const [key, value] = cookie.split(';')[0].split('=');
+                if (key && value) cookieJar[key] = value;
+            });
+        }
         
-        if (uid) {
-            const hasProfilePic = await checkProfilePicture(uid);
+        const uid = cookieJar.c_user;
+        
+        if (uid && submitResponse.status === 200) {
+            const cookieString = Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join('; ');
             
             const result = {
                 success: true,
                 uid: uid,
-                password: finalPassword,
+                password: password,
                 email: contact,
                 name: `${first} ${last}`,
                 gender: 'Female',
-                dob: `${payload.birthday_day}-${payload.birthday_month}-${payload.birthday_year}`,
-                hasProfilePic: hasProfilePic,
-                cookies: cookies
+                dob: `${birthdayDay}/${birthdayMonth}/${birthdayYear}`,
+                cookies: cookieString,
+                status: 'active'
             };
             
-            // Save to file
             await saveAccount(result);
-            
             return result;
+        } else if (submitResponse.data && submitResponse.data.includes('checkpoint')) {
+            return {
+                success: false,
+                error: 'Account requires checkpoint verification',
+                checkpoint: true
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Registration failed - unknown error',
+                status: submitResponse.status
+            };
         }
-        
-        return { success: false, error: 'Registration failed - no UID received' };
         
     } catch (error) {
-        return { success: false, error: error.message };
+        console.error('Creation error:', error.message);
+        return {
+            success: false,
+            error: error.message
+        };
     }
 }
 
-// Save account to file
-async function saveAccount(account) {
-    const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-    const line = `${account.uid}|${account.email}|${account.password}|${account.cookies}\n`;
-    await fs.appendFile(filePath, line);
-}
-
-// Bulk create accounts
-async function bulkCreateAccounts(emailType, passwordType, customPassword, count, showDetails, onProgress) {
-    const results = {
-        success: [],
-        failed: [],
-        total: count
-    };
-    
-    for (let i = 0; i < count; i++) {
-        const password = passwordType === 'custom' ? customPassword : null;
-        const result = await createFacebookAccount(emailType, passwordType, password);
-        
-        if (result.success) {
-            results.success.push(result);
-        } else {
-            results.failed.push(result);
-        }
-        
-        if (onProgress) {
-            onProgress({
-                current: i + 1,
-                total: count,
-                success: results.success.length,
-                failed: results.failed.length,
-                lastResult: result
-            });
-        }
-        
-        // Delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-    
-    return results;
-}
-
-// API Routes
+// Bulk create accounts with SSE
 app.post('/api/create-accounts', async (req, res) => {
     const { emailType, passwordType, customPassword, count, showDetails } = req.body;
     
-    if (!count || count < 1 || count > 100) {
-        return res.status(400).json({ error: 'Count must be between 1 and 100' });
+    if (!count || count < 1 || count > 50) {
+        return res.status(400).json({ error: 'Count must be between 1 and 50' });
     }
     
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     
     const results = {
         success: [],
@@ -366,44 +360,75 @@ app.post('/api/create-accounts', async (req, res) => {
     
     for (let i = 0; i < count; i++) {
         try {
-            const password = passwordType === 'custom' ? customPassword : null;
-            const result = await createFacebookAccount(emailType, passwordType, password);
+            const finalPassword = passwordType === 'custom' ? customPassword : null;
+            const result = await createFacebookAccount(emailType, finalPassword);
             
             if (result.success) {
                 results.success.push(result);
-                res.write(`data: ${JSON.stringify({ type: 'success', data: result, progress: { current: i + 1, total: count, success: results.success.length, failed: results.failed.length } })}\n\n`);
+                res.write(`data: ${JSON.stringify({ 
+                    type: 'success', 
+                    data: result, 
+                    progress: { 
+                        current: i + 1, 
+                        total: count, 
+                        success: results.success.length, 
+                        failed: results.failed.length 
+                    } 
+                })}\n\n`);
             } else {
                 results.failed.push(result);
-                res.write(`data: ${JSON.stringify({ type: 'error', data: result, progress: { current: i + 1, total: count, success: results.success.length, failed: results.failed.length } })}\n\n`);
+                res.write(`data: ${JSON.stringify({ 
+                    type: 'error', 
+                    data: result, 
+                    progress: { 
+                        current: i + 1, 
+                        total: count, 
+                        success: results.success.length, 
+                        failed: results.failed.length 
+                    } 
+                })}\n\n`);
             }
         } catch (error) {
             results.failed.push({ error: error.message });
-            res.write(`data: ${JSON.stringify({ type: 'error', data: { error: error.message }, progress: { current: i + 1, total: count, success: results.success.length, failed: results.failed.length } })}\n\n`);
+            res.write(`data: ${JSON.stringify({ 
+                type: 'error', 
+                data: { error: error.message }, 
+                progress: { 
+                    current: i + 1, 
+                    total: count, 
+                    success: results.success.length, 
+                    failed: results.failed.length 
+                } 
+            })}\n\n`);
         }
         
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Delay between requests
+        await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
     res.write(`data: ${JSON.stringify({ type: 'complete', results })}\n\n`);
     res.end();
 });
 
+// Get all accounts
 app.get('/api/accounts', async (req, res) => {
     try {
         const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-        const content = await fs.readFile(filePath, 'utf-8');
+        const content = await fs.readFile(filePath, 'utf-8').catch(() => '');
         const accounts = content.split('\n')
             .filter(line => line.trim())
             .map(line => {
-                const [uid, email, password, cookies] = line.split('|');
-                return { uid, email, password, cookies };
-            });
+                const [uid, email, password, cookies, date] = line.split('|');
+                return { uid, email, password, date: date || new Date().toISOString() };
+            })
+            .reverse();
         res.json(accounts);
     } catch (error) {
         res.json([]);
     }
 });
 
+// Delete all accounts
 app.delete('/api/accounts', async (req, res) => {
     try {
         const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
@@ -414,23 +439,15 @@ app.delete('/api/accounts', async (req, res) => {
     }
 });
 
+// Get stats
 app.get('/api/stats', async (req, res) => {
     try {
         const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-        const content = await fs.readFile(filePath, 'utf-8');
+        const content = await fs.readFile(filePath, 'utf-8').catch(() => '');
         const accounts = content.split('\n').filter(line => line.trim());
         res.json({ totalAccounts: accounts.length });
     } catch (error) {
         res.json({ totalAccounts: 0 });
-    }
-});
-
-app.get('/api/temp-mail', async (req, res) => {
-    try {
-        const response = await axios.get(CONFIG.temp_mail_api);
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 });
 
@@ -441,5 +458,9 @@ app.get('*', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`\n╔════════════════════════════════════════════╗`);
+    console.log(`║   CYBER-X Facebook Account Creator       ║`);
+    console.log(`║   Server running on:                     ║`);
+    console.log(`║   http://localhost:${PORT}                  ║`);
+    console.log(`╚════════════════════════════════════════════╝\n`);
 });
