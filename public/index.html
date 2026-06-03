@@ -32,14 +32,14 @@
             text-align: center;
             border: 2px solid #4a0080;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow-x: auto;
         }
 
         .banner pre {
             color: #00ff88;
-            font-size: 12px;
+            font-size: 10px;
             line-height: 1.2;
             text-shadow: 0 0 5px #00ff88;
-            overflow-x: auto;
         }
 
         .status {
@@ -161,7 +161,6 @@
         /* Progress Bar */
         .progress-container {
             margin: 20px 0;
-            display: none;
         }
 
         .progress-bar {
@@ -182,6 +181,7 @@
             justify-content: center;
             color: #000;
             font-weight: bold;
+            font-size: 12px;
         }
 
         /* Stats Grid */
@@ -198,10 +198,15 @@
             border-radius: 10px;
             text-align: center;
             border: 1px solid #4a0080;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
         }
 
         .stat-value {
-            font-size: 2em;
+            font-size: 2.5em;
             color: #00ff88;
             font-weight: bold;
         }
@@ -209,12 +214,14 @@
         .stat-label {
             color: #00aaff;
             margin-top: 5px;
+            font-size: 12px;
         }
 
         /* Results Table */
         .results-container {
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
+            margin-top: 15px;
         }
 
         table {
@@ -233,6 +240,7 @@
             color: #00ff88;
             position: sticky;
             top: 0;
+            font-weight: bold;
         }
 
         td {
@@ -261,9 +269,21 @@
         }
 
         .log-entry {
-            padding: 5px;
+            padding: 8px;
             margin: 5px 0;
             border-left: 3px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .log-success {
@@ -281,6 +301,11 @@
             color: #00aaff;
         }
 
+        .log-warning {
+            border-left-color: #ffaa00;
+            color: #ffaa00;
+        }
+
         /* Buttons Group */
         .button-group {
             display: flex;
@@ -295,6 +320,10 @@
 
         .btn-success {
             background: linear-gradient(135deg, #00aa44 0%, #008833 100%);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #00aaff 0%, #0088cc 100%);
         }
 
         /* Scrollbar */
@@ -335,6 +364,10 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            
+            .banner pre {
+                font-size: 6px;
+            }
         }
 
         /* Loading Spinner */
@@ -346,6 +379,8 @@
             border-radius: 50%;
             border-top-color: #00ff88;
             animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
@@ -378,6 +413,51 @@
         .tooltip:hover .tooltip-text {
             visibility: visible;
         }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .badge-danger {
+            background: #ff0044;
+            color: #fff;
+        }
+
+        .badge-warning {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* Copy button */
+        .copy-btn {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 255, 136, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -385,20 +465,20 @@
         <!-- Banner -->
         <div class="banner">
             <pre>
-╔═══════════════════════════════════════════════════════╗
-║  ▄▄▄   ▄   ▄ ▄▄▄▄  ▄▄▄▄ ▄▄▄▄      ▄  ▄              ║
-║ ██    ████  ██  █ ██  █ ██ ██     ╚██╗██╔╝             ║
-║ ██    ██ ██ ██████ ██████ ██████    ╚███╔╝              ║
-║ ██    ██ ██ ██  █ ██     ██ ██     ██╔██╗               ║
-║  ▀▀▀  ██ ██ ██████ █████  ██ ██   ██╔╝ ██╗             ║
-╠═══════════════════════════════════════════════════════╣
-║     ◆  A U T O   F A C E B O O K   T O O L  ◆          ║
-╠═══════════════════════════════════════════════════════╣
-║  ▸ DEV     │  CYBER-X TEAM                              ║
-║  ▸ TOOL    │  AUTO FACEBOOK CREATOR                     ║
-║  ▸ VERSION │  v3.0 WEB EDITION                          ║
-║  ▸ STATUS  │  ● ACTIVE ONLINE                           ║
-╚═══════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║  ▄▄▄   ▄   ▄ ▄▄▄▄  ▄▄▄▄ ▄▄▄▄      ▄  ▄                                          ║
+║ ██    ████  ██  █ ██  █ ██ ██     ╚██╗██╔╝                                         ║
+║ ██    ██ ██ ██████ ██████ ██████    ╚███╔╝                                          ║
+║ ██    ██ ██ ██  █ ██     ██ ██     ██╔██╗                                          ║
+║  ▀▀▀  ██ ██ ██████ █████  ██ ██   ██╔╝ ██╗                                         ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                          ◆  A U T O   F A C E B O O K   T O O L  ◆                ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║  ▸ DEV      │  CYBER-X TEAM                                                      ║
+║  ▸ TOOL     │  AUTO FACEBOOK CREATOR                                             ║
+║  ▸ VERSION  │  v3.0 WEB EDITION                                                  ║
+║  ▸ STATUS   │  ● ACTIVE ONLINE                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
             </pre>
             <div class="status">● SYSTEM ONLINE</div>
         </div>
@@ -411,11 +491,15 @@
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="successCount">0</div>
-                <div class="stat-label">Successful</div>
+                <div class="stat-label">Successful (This Session)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="failedCount">0</div>
-                <div class="stat-label">Failed</div>
+                <div class="stat-label">Failed (This Session)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
             </div>
         </div>
 
@@ -428,15 +512,15 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="bd" checked>
-                        <span>🇧🇩 BD Number</span>
+                        <span>🇧🇩 BD Phone Number</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="mixed">
-                        <span>🌍 Mixed Number</span>
+                        <span>🌍 International Number</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="temp">
-                        <span>📧 Temp Mail</span>
+                        <span>📧 Temporary Email</span>
                     </label>
                 </div>
             </div>
@@ -446,7 +530,7 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="passwordType" value="auto" checked>
-                        <span>🤖 Auto Generate</span>
+                        <span>🤖 Auto Generate (12 chars)</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="passwordType" value="custom">
@@ -457,27 +541,29 @@
 
             <div class="form-group" id="customPasswordGroup" style="display: none;">
                 <label>🔒 Custom Password</label>
-                <input type="text" id="customPassword" placeholder="Enter your password">
+                <input type="text" id="customPassword" placeholder="Enter your password (min 6 characters)">
+                <small style="color: #888;">Password must be at least 6 characters</small>
             </div>
 
             <div class="form-group">
-                <label>🔢 Number of Accounts (1-100)</label>
-                <input type="number" id="accountCount" min="1" max="100" value="1">
+                <label>🔢 Number of Accounts (1-50)</label>
+                <input type="number" id="accountCount" min="1" max="50" value="1">
+                <small style="color: #888;">Creating more than 10 accounts may trigger rate limiting</small>
             </div>
 
             <div class="form-group">
                 <label class="tooltip">
                     ℹ️ Show Details
-                    <span class="tooltip-text">Show full account information</span>
+                    <span class="tooltip-text">Show full account information including name and DOB</span>
                 </label>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="showDetails" value="yes">
-                        <span>Yes</span>
+                        <span>Yes - Show All Details</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="showDetails" value="no" checked>
-                        <span>No</span>
+                        <span>No - Minimal Output</span>
                     </label>
                 </div>
             </div>
@@ -489,32 +575,43 @@
 
         <!-- Progress -->
         <div class="card" id="progressCard" style="display: none;">
-            <div class="card-title">📊 PROGRESS</div>
-            <div class="progress-container" id="progressContainer">
+            <div class="card-title">📊 CREATION PROGRESS</div>
+            <div class="progress-container">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill">0%</div>
                 </div>
             </div>
-            <div id="progressStats" style="margin-top: 15px; color: #00aaff;"></div>
+            <div id="progressStats" style="margin-top: 15px; color: #00aaff; text-align: center;"></div>
         </div>
 
         <!-- Live Log -->
         <div class="card">
-            <div class="card-title">📝 LIVE LOG</div>
+            <div class="card-title">
+                📝 LIVE ACTIVITY LOG
+                <button class="copy-btn" onclick="clearLog()" style="float: right; background: rgba(255,0,68,0.2);">Clear Log</button>
+            </div>
             <div class="log-container" id="logContainer">
+                <div class="log-entry log-info">[SYSTEM] Welcome to CYBER-X Facebook Account Creator</div>
+                <div class="log-entry log-info">[SYSTEM] Server status: Online</div>
                 <div class="log-entry log-info">[SYSTEM] Ready to create accounts...</div>
             </div>
         </div>
 
         <!-- Results Table -->
         <div class="card">
-            <div class="card-title">📋 CREATED ACCOUNTS</div>
+            <div class="card-title">
+                📋 CREATED ACCOUNTS
+                <span style="float: right; font-size: 12px;" id="accountCountDisplay"></span>
+            </div>
             <div class="button-group">
                 <button id="refreshBtn" class="btn-success" onclick="loadAccounts()">
-                    🔄 Refresh
+                    🔄 Refresh List
                 </button>
                 <button id="clearBtn" class="btn-danger" onclick="clearAccounts()">
-                    🗑️ Clear All
+                    🗑️ Delete All Accounts
+                </button>
+                <button id="exportBtn" class="btn-info" onclick="exportAccounts()">
+                    💾 Export to Text
                 </button>
             </div>
             <div class="results-container">
@@ -524,12 +621,13 @@
                             <th>UID</th>
                             <th>Email/Phone</th>
                             <th>Password</th>
+                            <th>Created</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
                         <tr>
-                            <td colspan="4" style="text-align: center;">No accounts created yet</td>
+                            <td colspan="5" style="text-align: center;">No accounts created yet</td>
                         </tr>
                     </tbody>
                 </table>
@@ -541,26 +639,41 @@
         let eventSource = null;
         let successCount = 0;
         let failedCount = 0;
+        let isCreating = false;
 
         // Add log entry
         function addLog(message, type = 'info') {
             const logContainer = document.getElementById('logContainer');
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry log-${type}`;
-            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
             
-            // Limit log entries
-            while (logContainer.children.length > 100) {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            logEntry.textContent = `[${timestamp}] ${icon} ${message}`;
+            logContainer.appendChild(logEntry);
+            logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Limit log entries to 200
+            while (logContainer.children.length > 200) {
                 logContainer.removeChild(logContainer.firstChild);
             }
+        }
+
+        // Clear log
+        function clearLog() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = '';
+            addLog('Log cleared', 'info');
         }
 
         // Update stats display
         function updateStatsDisplay() {
             document.getElementById('successCount').textContent = successCount;
             document.getElementById('failedCount').textContent = failedCount;
+            const total = successCount + failedCount;
+            const rate = total > 0 ? ((successCount / total) * 100).toFixed(1) : 0;
+            document.getElementById('successRate').textContent = `${rate}%`;
         }
 
         // Load accounts from server
@@ -570,20 +683,27 @@
                 const accounts = await response.json();
                 
                 const tbody = document.getElementById('resultsBody');
+                document.getElementById('totalAccounts').textContent = accounts.length;
+                document.getElementById('accountCountDisplay').textContent = `(${accounts.length} total)`;
+                
                 if (accounts.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No accounts created yet</td></tr>';
-                    document.getElementById('totalAccounts').textContent = '0';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No accounts created yet</td></tr>';
                     return;
                 }
                 
-                document.getElementById('totalAccounts').textContent = accounts.length;
-                
                 tbody.innerHTML = accounts.map(account => `
                     <tr class="success-row">
-                        <td>${account.uid || 'N/A'}</td>
+                        <td style="font-family: monospace;">
+                            ${account.uid || 'N/A'}
+                            <button class="copy-btn" onclick="copyToClipboard('${account.uid}')">Copy</button>
+                        </td>
                         <td>${account.email || 'N/A'}</td>
-                        <td>${account.password || 'N/A'}</td>
-                        <td style="color: #00ff88;">✓ Active</td>
+                        <td>
+                            ${account.password || 'N/A'}
+                            <button class="copy-btn" onclick="copyToClipboard('${account.password}')">Copy</button>
+                        </td>
+                        <td>${account.date ? new Date(account.date).toLocaleString() : 'N/A'}</td>
+                        <td><span class="badge badge-success">Active</span></td>
                     </tr>
                 `).join('');
             } catch (error) {
@@ -591,19 +711,59 @@
             }
         }
 
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                addLog(`Copied to clipboard: ${text}`, 'success');
+            }).catch(() => {
+                addLog('Failed to copy to clipboard', 'error');
+            });
+        }
+
+        // Export accounts
+        function exportAccounts() {
+            const table = document.getElementById('resultsTable');
+            const rows = table.querySelectorAll('tbody tr');
+            let exportText = 'UID|Email/Phone|Password|Date|Status\n';
+            
+            rows.forEach(row => {
+                if (row.cells.length === 5) {
+                    const uid = row.cells[0].innerText.split('Copy')[0].trim();
+                    const email = row.cells[1].innerText;
+                    const password = row.cells[2].innerText.split('Copy')[0].trim();
+                    const date = row.cells[3].innerText;
+                    const status = row.cells[4].innerText;
+                    exportText += `${uid}|${email}|${password}|${date}|${status}\n`;
+                }
+            });
+            
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cyberx_accounts_${new Date().toISOString().slice(0,19)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            addLog(`Exported ${rows.length} accounts to file`, 'success');
+        }
+
         // Clear all accounts
         async function clearAccounts() {
-            if (!confirm('⚠️ Are you sure you want to delete all accounts? This cannot be undone!')) {
+            if (!confirm('⚠️ WARNING: This will permanently delete ALL saved accounts!\n\nAre you absolutely sure?')) {
                 return;
             }
             
             try {
                 const response = await fetch('/api/accounts', { method: 'DELETE' });
                 if (response.ok) {
-                    addLog('All accounts cleared successfully', 'success');
+                    addLog('All accounts have been deleted successfully', 'success');
                     loadAccounts();
+                    // Reset session stats
+                    successCount = 0;
+                    failedCount = 0;
+                    updateStatsDisplay();
                 } else {
-                    addLog('Failed to clear accounts', 'error');
+                    addLog('Failed to delete accounts', 'error');
                 }
             } catch (error) {
                 addLog(`Error: ${error.message}`, 'error');
@@ -612,9 +772,13 @@
 
         // Start account creation
         async function startCreation() {
+            if (isCreating) {
+                addLog('Creation already in progress. Please wait.', 'warning');
+                return;
+            }
+            
             const createBtn = document.getElementById('createBtn');
             const progressCard = document.getElementById('progressCard');
-            const progressContainer = document.getElementById('progressContainer');
             
             // Get form values
             const emailType = document.querySelector('input[name="emailType"]:checked').value;
@@ -624,84 +788,127 @@
             const showDetails = document.querySelector('input[name="showDetails"]:checked').value;
             
             // Validation
-            if (count < 1 || count > 100) {
-                addLog('Please enter a number between 1 and 100', 'error');
+            if (isNaN(count) || count < 1) {
+                addLog('Please enter a valid number of accounts (1-50)', 'error');
                 return;
             }
             
-            if (passwordType === 'custom' && !customPassword) {
-                addLog('Please enter a custom password', 'error');
+            if (count > 50) {
+                addLog('Maximum 50 accounts per session', 'error');
                 return;
             }
             
-            // Reset stats
+            if (passwordType === 'custom') {
+                if (!customPassword) {
+                    addLog('Please enter a custom password', 'error');
+                    return;
+                }
+                if (customPassword.length < 6) {
+                    addLog('Password must be at least 6 characters', 'error');
+                    return;
+                }
+            }
+            
+            // Reset stats for this session
             successCount = 0;
             failedCount = 0;
             updateStatsDisplay();
             
             // Show progress
+            isCreating = true;
             createBtn.disabled = true;
-            createBtn.innerHTML = '<div class="spinner"></div> CREATING...';
+            createBtn.innerHTML = '<div class="spinner"></div> CREATING ACCOUNTS...';
             progressCard.style.display = 'block';
-            progressContainer.style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressFill').textContent = '0%';
+            document.getElementById('progressStats').innerHTML = 'Initializing...';
             
-            addLog(`Starting creation of ${count} account(s)...`, 'info');
-            addLog(`Email Type: ${emailType}, Password Type: ${passwordType}`, 'info');
+            addLog(`════════════════════════════════════════`, 'info');
+            addLog(`🚀 Starting creation of ${count} account(s)`, 'info');
+            addLog(`📧 Email Type: ${emailType.toUpperCase()}`, 'info');
+            addLog(`🔑 Password Type: ${passwordType === 'auto' ? 'Auto-generated' : 'Custom'}`, 'info');
+            addLog(`🔢 Total: ${count} accounts`, 'info');
+            addLog(`════════════════════════════════════════`, 'info');
             
             try {
                 const response = await fetch('/api/create-accounts', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type':application/json' },
                     body: JSON.stringify({ emailType, passwordType, customPassword, count, showDetails })
                 });
                 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
+                let buffer = '';
                 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
                     
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
                     
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
-                            const data = JSON.parse(line.slice(6));
-                            
-                            if (data.type === 'success') {
-                                successCount++;
-                                updateStatsDisplay();
+                            try {
+                                const data = JSON.parse(line.slice(6));
                                 
-                                const progress = (data.progress.current / data.progress.total) * 100;
-                                document.getElementById('progressFill').style.width = `${progress}%`;
-                                document.getElementById('progressFill').textContent = `${Math.round(progress)}%`;
-                                document.getElementById('progressStats').innerHTML = `
-                                    📊 Progress: ${data.progress.current}/${data.progress.total}<br>
-                                    ✅ Success: ${data.progress.success} | ❌ Failed: ${data.progress.failed}
-                                `;
-                                
-                                if (showDetails === 'yes') {
-                                    addLog(`✅ Account created: ${data.data.uid} | ${data.data.email} | ${data.data.password}`, 'success');
-                                } else {
-                                    addLog(`✅ Account created: ${data.data.uid}`, 'success');
+                                if (data.type === 'success') {
+                                    successCount++;
+                                    updateStatsDisplay();
+                                    
+                                    const percent = (data.progress.current / data.progress.total) * 100;
+                                    document.getElementById('progressFill').style.width = `${percent}%`;
+                                    document.getElementById('progressFill').textContent = `${Math.round(percent)}%`;
+                                    document.getElementById('progressStats').innerHTML = `
+                                        <strong>Progress:</strong> ${data.progress.current}/${data.progress.total} (${Math.round(percent)}%)<br>
+                                        <span style="color: #00ff88;">✅ Successful: ${data.progress.success}</span> | 
+                                        <span style="color: #ff0044;">❌ Failed: ${data.progress.failed}</span>
+                                    `;
+                                    
+                                    if (showDetails === 'yes') {
+                                        addLog(`✅ Account #${data.progress.current}: ${data.data.uid} | ${data.data.name} | ${data.data.email} | ${data.data.password}`, 'success');
+                                    } else {
+                                        addLog(`✅ Account #${data.progress.current}: ${data.data.uid} created successfully`, 'success');
+                                    }
+                                    
+                                    loadAccounts();
+                                } else if (data.type === 'error') {
+                                    failedCount++;
+                                    updateStatsDisplay();
+                                    
+                                    const percent = (data.progress.current / data.progress.total) * 100;
+                                    document.getElementById('progressFill').style.width = `${percent}%`;
+                                    document.getElementById('progressFill').textContent = `${Math.round(percent)}%`;
+                                    document.getElementById('progressStats').innerHTML = `
+                                        <strong>Progress:</strong> ${data.progress.current}/${data.progress.total} (${Math.round(percent)}%)<br>
+                                        <span style="color: #00ff88;">✅ Successful: ${data.progress.success}</span> | 
+                                        <span style="color: #ff0044;">❌ Failed: ${data.progress.failed}</span>
+                                    `;
+                                    
+                                    addLog(`❌ Account #${data.progress.current}: ${data.data.error || 'Creation failed'}`, 'error');
+                                } else if (data.type === 'complete') {
+                                    addLog(`════════════════════════════════════════`, 'success');
+                                    addLog(`✨ CREATION COMPLETED!`, 'success');
+                                    addLog(`✅ Successful: ${data.results.success.length} accounts`, 'success');
+                                    addLog(`❌ Failed: ${data.results.failed.length} accounts`, 'error');
+                                    addLog(`📊 Success Rate: ${((data.results.success.length / data.results.total) * 100).toFixed(1)}%`, 'info');
+                                    addLog(`════════════════════════════════════════`, 'success');
+                                    
+                                    isCreating = false;
+                                    createBtn.disabled = false;
+                                    createBtn.innerHTML = '🚀 START CREATION';
                                 }
-                                
-                                loadAccounts(); // Refresh the list
-                            } else if (data.type === 'error') {
-                                failedCount++;
-                                updateStatsDisplay();
-                                addLog(`❌ Failed: ${data.data.error || 'Unknown error'}`, 'error');
-                            } else if (data.type === 'complete') {
-                                addLog(`✨ Creation completed! Success: ${data.results.success.length}, Failed: ${data.results.failed.length}`, 'success');
-                                createBtn.disabled = false;
-                                createBtn.innerHTML = '🚀 START CREATION';
+                            } catch (e) {
+                                console.error('Parse error:', e);
                             }
                         }
                     }
                 }
             } catch (error) {
-                addLog(`Error: ${error.message}`, 'error');
+                addLog(`Connection error: ${error.message}`, 'error');
+                isCreating = false;
                 createBtn.disabled = false;
                 createBtn.innerHTML = '🚀 START CREATION';
             }
@@ -715,11 +922,18 @@
             });
         });
         
+        // Auto-refresh every 10 seconds
+        let refreshInterval = setInterval(loadAccounts, 10000);
+        
         // Load initial data
         loadAccounts();
         
-        // Auto-refresh every 10 seconds
-        setInterval(loadAccounts, 10000);
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
     </script>
 </body>
 </html>
