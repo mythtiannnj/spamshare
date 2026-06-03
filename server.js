@@ -19,7 +19,6 @@ const CONFIG = {
     output_dir: path.join(__dirname, 'output'),
     facebook_reg_url: 'https://m.facebook.com/reg/',
     facebook_submit_url: 'https://m.facebook.com/reg/submit/',
-    facebook_confirm_url: 'https://m.facebook.com/confirmemail.php'
 };
 
 // Ensure output directory exists
@@ -70,24 +69,10 @@ const surnames = [
     "Lim", "Tan", "Chua"
 ];
 
-// Phone prefixes by country
-const phoneConfigs = {
-    BD: { code: '88', prefixes: ['17', '18', '19', '16', '15', '13', '14'], length: 8 },
-    PH: { code: '63', prefixes: ['917', '918', '919', '920', '921', '922'], length: 7 },
-    ID: { code: '62', prefixes: ['813', '815', '816', '817', '818', '819'], length: 7 },
-    IN: { code: '91', prefixes: ['98', '99', '97', '96', '95', '94'], length: 8 },
-    PK: { code: '92', prefixes: ['300', '301', '302', '303', '304', '305'], length: 7 },
-    US: { code: '1', prefixes: ['201', '202', '303', '312', '415', '646', '718'], length: 7 }
-};
-
-// Generate random User-Agent
 function generateUserAgent() {
     const androidVersions = ['10', '11', '12', '13', '14'];
     const chromeVersions = ['120', '121', '122', '123', '124'];
-    const devices = [
-        'SM-G998B', 'Pixel 7 Pro', 'OnePlus 11', 'Xiaomi 13 Pro', 
-        'OPPO Find X6', 'Realme GT 3', 'vivo X90 Pro'
-    ];
+    const devices = ['SM-G998B', 'Pixel 7 Pro', 'OnePlus 11', 'Xiaomi 13 Pro', 'OPPO Find X6'];
     
     const androidVer = androidVersions[Math.floor(Math.random() * androidVersions.length)];
     const chromeVer = chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
@@ -98,59 +83,50 @@ function generateUserAgent() {
     return `Mozilla/5.0 (Linux; Android ${androidVer}; ${device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVer}.0.${buildVer}.${patchVer} Mobile Safari/537.36`;
 }
 
-// Generate random password
 function generatePassword() {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*';
-    
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
     let password = '';
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += symbols[Math.floor(Math.random() * symbols.length)];
-    
-    const allChars = uppercase + lowercase + numbers + symbols;
-    for (let i = password.length; i < 12; i++) {
-        password += allChars[Math.floor(Math.random() * allChars.length)];
+    for (let i = 0; i < 12; i++) {
+        password += chars[Math.floor(Math.random() * chars.length)];
     }
-    
-    return password.split('').sort(() => Math.random() - 0.5).join('');
+    return password;
 }
 
-// Generate phone number
-function generatePhoneNumber(type = 'bd') {
-    if (type === 'bd') {
-        const prefixes = ['17', '18', '19', '16', '15', '13', '14'];
-        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        let number = '';
-        for (let i = 0; i < 8; i++) {
-            number += Math.floor(Math.random() * 10);
-        }
-        return `${prefix}${number}`;
-    } else if (type === 'mixed') {
-        const countries = Object.keys(phoneConfigs);
-        const country = countries[Math.floor(Math.random() * countries.length)];
-        const config = phoneConfigs[country];
-        const prefix = config.prefixes[Math.floor(Math.random() * config.prefixes.length)];
-        let number = '';
-        for (let i = 0; i < config.length; i++) {
-            number += Math.floor(Math.random() * 10);
-        }
-        return `${prefix}${number}`;
+function generateBDPhone() {
+    const prefixes = ['17', '18', '19', '16', '15', '13', '14'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    let number = '';
+    for (let i = 0; i < 8; i++) {
+        number += Math.floor(Math.random() * 10);
     }
-    return generateTempEmail();
+    return `${prefix}${number}`;
 }
 
-// Generate temp email
+function generateMixedPhone() {
+    const prefixes = {
+        '1': ['201', '202', '303', '312', '415', '646', '718'],
+        '44': ['7400', '7500', '7600', '7700', '7800', '7900'],
+        '63': ['917', '918', '919', '920', '921', '922'],
+        '62': ['813', '815', '816', '817', '818', '819']
+    };
+    const codes = Object.keys(prefixes);
+    const code = codes[Math.floor(Math.random() * codes.length)];
+    const prefixList = prefixes[code];
+    const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
+    let number = '';
+    const length = code === '44' ? 6 : 7;
+    for (let i = 0; i < length; i++) {
+        number += Math.floor(Math.random() * 10);
+    }
+    return `${code}${prefix}${number}`;
+}
+
 function generateTempEmail() {
-    const domains = ['guerrillamail.com', '10minutemail.com', 'tempmail.com'];
+    const domains = ['guerrillamail.com', '10minutemail.com', 'tempmail.com', 'mailinator.com'];
     const username = crypto.randomBytes(6).toString('hex');
     return `${username}@${domains[Math.floor(Math.random() * domains.length)]}`;
 }
 
-// Get random name
 function getRandomName() {
     return {
         first: firstNames[Math.floor(Math.random() * firstNames.length)],
@@ -158,30 +134,23 @@ function getRandomName() {
     };
 }
 
-// Extract form data from HTML
 function extractFormData(html) {
     const $ = cheerio.load(html);
     const formData = {};
-    
     $('input').each((i, elem) => {
         const name = $(elem).attr('name');
         const value = $(elem).attr('value') || '';
-        if (name && !formData[name]) {
-            formData[name] = value;
-        }
+        if (name) formData[name] = value;
     });
-    
     return formData;
 }
 
-// Save account to file
 async function saveAccount(account) {
     const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
     const line = `${account.uid}|${account.email}|${account.password}|${account.cookies}|${new Date().toISOString()}\n`;
     await fs.appendFile(filePath, line);
 }
 
-// Create Facebook account
 async function createFacebookAccount(emailType, customPassword = null) {
     const session = axios.create({
         timeout: 30000,
@@ -190,7 +159,6 @@ async function createFacebookAccount(emailType, customPassword = null) {
     });
     
     try {
-        // Step 1: Get registration page and extract tokens
         const userAgent = generateUserAgent();
         const headers = {
             'User-Agent': userAgent,
@@ -198,35 +166,25 @@ async function createFacebookAccount(emailType, customPassword = null) {
             'Accept-Language': 'en-US,en;q=0.9',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Cache-Control': 'max-age=0'
+            'Upgrade-Insecure-Requests': '1'
         };
         
         const regResponse = await session.get(CONFIG.facebook_reg_url, { headers });
-        
         if (regResponse.status !== 200) {
             throw new Error(`Failed to load registration page: ${regResponse.status}`);
         }
         
         const formData = extractFormData(regResponse.data);
-        
-        // Step 2: Prepare registration data
         const { first, last } = getRandomName();
         const password = customPassword || generatePassword();
         
-        // Generate contact based on type
         let contact;
-        let contactType = 'email';
-        
         if (emailType === 'temp') {
             contact = generateTempEmail();
-            contactType = 'email';
         } else if (emailType === 'mixed') {
-            contact = generatePhoneNumber('mixed');
-            contactType = 'phone';
+            contact = generateMixedPhone();
         } else {
-            contact = generatePhoneNumber('bd');
-            contactType = 'phone';
+            contact = generateBDPhone();
         }
         
         const birthdayDay = Math.floor(Math.random() * 28) + 1;
@@ -234,50 +192,34 @@ async function createFacebookAccount(emailType, customPassword = null) {
         const birthdayYear = Math.floor(Math.random() * 15) + 1985;
         
         const payload = {
-            'reg_instance': formData.reg_instance || '',
-            'email': contactType === 'email' ? contact : '',
-            'phone_number': contactType === 'phone' ? contact : '',
-            'firstname': first,
-            'lastname': last,
-            'birthday_day': birthdayDay,
-            'birthday_month': birthdayMonth,
-            'birthday_year': birthdayYear,
-            'sex': '1',
-            'custom_gender': '',
-            'reg_email_confirmation_': contactType === 'email' ? contact : '',
-            'password': password,
-            'submit': 'Sign Up',
-            'lsd': formData.lsd || '',
-            'jazoest': formData.jazoest || '',
-            'm_ts': Date.now(),
-            'li': formData.li || '',
-            'reg_mail': contactType === 'email' ? contact : '',
-            'reg_phone': contactType === 'phone' ? contact : ''
+            reg_instance: formData.reg_instance || '',
+            email: emailType === 'temp' ? contact : '',
+            phone_number: emailType !== 'temp' ? contact : '',
+            firstname: first,
+            lastname: last,
+            birthday_day: birthdayDay,
+            birthday_month: birthdayMonth,
+            birthday_year: birthdayYear,
+            sex: '1',
+            password: password,
+            submit: 'Sign Up',
+            lsd: formData.lsd || '',
+            jazoest: formData.jazoest || ''
         };
         
-        // Clean up payload (remove empty values)
         Object.keys(payload).forEach(key => {
-            if (payload[key] === '' && key !== 'custom_gender') {
-                delete payload[key];
-            }
+            if (payload[key] === '') delete payload[key];
         });
         
-        // Step 3: Submit registration
         const submitHeaders = {
             ...headers,
             'Content-Type': 'application/x-www-form-urlencoded',
             'Origin': 'https://m.facebook.com',
-            'Referer': CONFIG.facebook_reg_url,
-            'Host': 'm.facebook.com'
+            'Referer': CONFIG.facebook_reg_url
         };
         
-        const submitResponse = await session.post(
-            CONFIG.facebook_submit_url,
-            new URLSearchParams(payload).toString(),
-            { headers: submitHeaders }
-        );
+        await session.post(CONFIG.facebook_submit_url, new URLSearchParams(payload).toString(), { headers: submitHeaders });
         
-        // Step 4: Check cookies for successful registration
         const cookies = session.defaults.headers.common['Cookie'] || '';
         const cookieJar = {};
         
@@ -288,20 +230,10 @@ async function createFacebookAccount(emailType, customPassword = null) {
             });
         }
         
-        // Also try to get cookies from response headers
-        if (submitResponse.headers['set-cookie']) {
-            const setCookies = submitResponse.headers['set-cookie'];
-            setCookies.forEach(cookie => {
-                const [key, value] = cookie.split(';')[0].split('=');
-                if (key && value) cookieJar[key] = value;
-            });
-        }
-        
         const uid = cookieJar.c_user;
         
-        if (uid && submitResponse.status === 200) {
+        if (uid) {
             const cookieString = Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join('; ');
-            
             const result = {
                 success: true,
                 uid: uid,
@@ -310,53 +242,29 @@ async function createFacebookAccount(emailType, customPassword = null) {
                 name: `${first} ${last}`,
                 gender: 'Female',
                 dob: `${birthdayDay}/${birthdayMonth}/${birthdayYear}`,
-                cookies: cookieString,
-                status: 'active'
+                cookies: cookieString
             };
-            
             await saveAccount(result);
             return result;
-        } else if (submitResponse.data && submitResponse.data.includes('checkpoint')) {
-            return {
-                success: false,
-                error: 'Account requires checkpoint verification',
-                checkpoint: true
-            };
-        } else {
-            return {
-                success: false,
-                error: 'Registration failed - unknown error',
-                status: submitResponse.status
-            };
         }
         
+        return { success: false, error: 'Registration failed - no UID received' };
     } catch (error) {
-        console.error('Creation error:', error.message);
-        return {
-            success: false,
-            error: error.message
-        };
+        return { success: false, error: error.message };
     }
 }
 
-// Bulk create accounts with SSE
+// API Routes
 app.post('/api/create-accounts', async (req, res) => {
-    const { emailType, passwordType, customPassword, count, showDetails } = req.body;
+    const { emailType, passwordType, customPassword, count } = req.body;
     
-    if (!count || count < 1 || count > 50) {
-        return res.status(400).json({ error: 'Count must be between 1 and 50' });
+    if (!count || count < 1 || count > 20) {
+        return res.status(400).json({ error: 'Count must be between 1 and 20' });
     }
     
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    
-    const results = {
-        success: [],
-        failed: [],
-        total: count
-    };
     
     for (let i = 0; i < count; i++) {
         try {
@@ -364,53 +272,20 @@ app.post('/api/create-accounts', async (req, res) => {
             const result = await createFacebookAccount(emailType, finalPassword);
             
             if (result.success) {
-                results.success.push(result);
-                res.write(`data: ${JSON.stringify({ 
-                    type: 'success', 
-                    data: result, 
-                    progress: { 
-                        current: i + 1, 
-                        total: count, 
-                        success: results.success.length, 
-                        failed: results.failed.length 
-                    } 
-                })}\n\n`);
+                res.write(`data: ${JSON.stringify({ type: 'success', data: result, current: i + 1, total: count })}\n\n`);
             } else {
-                results.failed.push(result);
-                res.write(`data: ${JSON.stringify({ 
-                    type: 'error', 
-                    data: result, 
-                    progress: { 
-                        current: i + 1, 
-                        total: count, 
-                        success: results.success.length, 
-                        failed: results.failed.length 
-                    } 
-                })}\n\n`);
+                res.write(`data: ${JSON.stringify({ type: 'error', data: result, current: i + 1, total: count })}\n\n`);
             }
         } catch (error) {
-            results.failed.push({ error: error.message });
-            res.write(`data: ${JSON.stringify({ 
-                type: 'error', 
-                data: { error: error.message }, 
-                progress: { 
-                    current: i + 1, 
-                    total: count, 
-                    success: results.success.length, 
-                    failed: results.failed.length 
-                } 
-            })}\n\n`);
+            res.write(`data: ${JSON.stringify({ type: 'error', data: { error: error.message }, current: i + 1, total: count })}\n\n`);
         }
-        
-        // Delay between requests
         await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
-    res.write(`data: ${JSON.stringify({ type: 'complete', results })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
     res.end();
 });
 
-// Get all accounts
 app.get('/api/accounts', async (req, res) => {
     try {
         const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
@@ -428,7 +303,6 @@ app.get('/api/accounts', async (req, res) => {
     }
 });
 
-// Delete all accounts
 app.delete('/api/accounts', async (req, res) => {
     try {
         const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
@@ -439,28 +313,13 @@ app.delete('/api/accounts', async (req, res) => {
     }
 });
 
-// Get stats
-app.get('/api/stats', async (req, res) => {
-    try {
-        const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-        const content = await fs.readFile(filePath, 'utf-8').catch(() => '');
-        const accounts = content.split('\n').filter(line => line.trim());
-        res.json({ totalAccounts: accounts.length });
-    } catch (error) {
-        res.json({ totalAccounts: 0 });
-    }
-});
-
-// Serve frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
 app.listen(PORT, () => {
     console.log(`\n╔════════════════════════════════════════════╗`);
     console.log(`║   CYBER-X Facebook Account Creator       ║`);
-    console.log(`║   Server running on:                     ║`);
-    console.log(`║   http://localhost:${PORT}                  ║`);
+    console.log(`║   Server running on: http://localhost:${PORT} ║`);
     console.log(`╚════════════════════════════════════════════╝\n`);
 });
