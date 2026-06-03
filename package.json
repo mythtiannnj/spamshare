@@ -1,24 +1,19 @@
 {
-  "name": "facebook-account-creator",
-  "version": "1.0.0",
-  "description": "Facebook account creation tool with temp email",
-  "main": "index.js",
+  "name": "cyberx-facebook-creator",
+  "version": "3.0.0",
+  "description": "Auto Facebook Account Creator Web Application",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.6.0",
-    "crypto": "^1.0.1",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
-    "node-cache": "^5.1.2"
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  },
-  "keywords": ["facebook", "account", "creator", "temp-mail"],
-  "author": "",
-  "license": "MIT"
+  }
 }
