@@ -124,6 +124,14 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover {
+            background: rgba(0, 255, 136, 0.1);
         }
 
         .radio-option input {
@@ -139,23 +147,25 @@
             background: linear-gradient(135deg, #4a0080 0%, #6a00a0 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 14px 30px;
             border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
             font-family: monospace;
+            width: 100%;
         }
 
         button:hover:not(:disabled) {
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 5px 20px rgba(106, 0, 160, 0.5);
         }
 
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
         /* Progress Bar */
@@ -165,9 +175,9 @@
 
         .progress-bar {
             width: 100%;
-            height: 30px;
+            height: 35px;
             background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
+            border-radius: 18px;
             overflow: hidden;
             border: 1px solid #4a0080;
         }
@@ -175,19 +185,19 @@
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #00ff88, #00aaff);
-            transition: width 0.3s;
+            transition: width 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #000;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -199,10 +209,12 @@
             text-align: center;
             border: 1px solid #4a0080;
             transition: transform 0.3s;
+            cursor: pointer;
         }
 
         .stat-card:hover {
             transform: translateY(-3px);
+            border-color: #00ff88;
         }
 
         .stat-value {
@@ -249,12 +261,8 @@
             font-size: 12px;
         }
 
-        .success-row {
-            background: rgba(0, 255, 136, 0.1);
-        }
-
-        .error-row {
-            background: rgba(255, 0, 0, 0.1);
+        tr:hover {
+            background: rgba(0, 255, 136, 0.05);
         }
 
         /* Log Container */
@@ -273,6 +281,7 @@
             margin: 5px 0;
             border-left: 3px solid;
             animation: slideIn 0.3s ease;
+            word-break: break-all;
         }
 
         @keyframes slideIn {
@@ -289,11 +298,13 @@
         .log-success {
             border-left-color: #00ff88;
             color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
         }
 
         .log-error {
             border-left-color: #ff0044;
             color: #ff0044;
+            background: rgba(255, 0, 68, 0.05);
         }
 
         .log-info {
@@ -312,6 +323,11 @@
             gap: 15px;
             flex-wrap: wrap;
             margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            min-width: 120px;
         }
 
         .btn-danger {
@@ -368,6 +384,14 @@
             .banner pre {
                 font-size: 6px;
             }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group button {
+                width: 100%;
+            }
         }
 
         /* Loading Spinner */
@@ -385,6 +409,46 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-left: 8px;
+            border-radius: 4px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 255, 136, 0.4);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #00ff88;
+            color: #000;
         }
 
         /* Tooltip */
@@ -414,49 +478,14 @@
             visibility: visible;
         }
 
-        /* Badge */
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
 
-        .badge-success {
-            background: #00ff88;
-            color: #000;
-        }
-
-        .badge-danger {
-            background: #ff0044;
-            color: #fff;
-        }
-
-        .badge-warning {
-            background: #ffaa00;
-            color: #000;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        /* Copy button */
-        .copy-btn {
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid #00ff88;
-            padding: 4px 8px;
-            font-size: 10px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-
-        .copy-btn:hover {
-            background: rgba(0, 255, 136, 0.4);
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
     </style>
 </head>
@@ -485,21 +514,21 @@
 
         <!-- Stats -->
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" onclick="loadAccounts()">
                 <div class="stat-value" id="totalAccounts">0</div>
-                <div class="stat-label">Total Accounts Created</div>
+                <div class="stat-label">📁 Total Accounts</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="successCount">0</div>
-                <div class="stat-label">Successful (This Session)</div>
+                <div class="stat-label">✅ Success (Session)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="failedCount">0</div>
-                <div class="stat-label">Failed (This Session)</div>
+                <div class="stat-label">❌ Failed (Session)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="successRate">0%</div>
-                <div class="stat-label">Success Rate</div>
+                <div class="stat-label">📊 Success Rate</div>
             </div>
         </div>
 
@@ -508,15 +537,15 @@
             <div class="card-title">⚡ CREATE FACEBOOK ACCOUNTS</div>
             
             <div class="form-group">
-                <label>📧 EMAIL/PHONE TYPE</label>
+                <label>📧 CONTACT TYPE</label>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="bd" checked>
-                        <span>🇧🇩 BD Phone Number</span>
+                        <span>🇧🇩 Bangladesh Phone</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="mixed">
-                        <span>🌍 International Number</span>
+                        <span>🌍 International Phone</span>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="emailType" value="temp">
@@ -542,33 +571,16 @@
             <div class="form-group" id="customPasswordGroup" style="display: none;">
                 <label>🔒 Custom Password</label>
                 <input type="text" id="customPassword" placeholder="Enter your password (min 6 characters)">
-                <small style="color: #888;">Password must be at least 6 characters</small>
+                <small style="color: #888; display: block; margin-top: 5px;">Password must be at least 6 characters</small>
             </div>
 
             <div class="form-group">
-                <label>🔢 Number of Accounts (1-50)</label>
-                <input type="number" id="accountCount" min="1" max="50" value="1">
-                <small style="color: #888;">Creating more than 10 accounts may trigger rate limiting</small>
+                <label>🔢 NUMBER OF ACCOUNTS (1-20)</label>
+                <input type="number" id="accountCount" min="1" max="20" value="1" step="1">
+                <small style="color: #888; display: block; margin-top: 5px;">Creating more than 10 accounts may trigger rate limiting</small>
             </div>
 
-            <div class="form-group">
-                <label class="tooltip">
-                    ℹ️ Show Details
-                    <span class="tooltip-text">Show full account information including name and DOB</span>
-                </label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="showDetails" value="yes">
-                        <span>Yes - Show All Details</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="showDetails" value="no" checked>
-                        <span>No - Minimal Output</span>
-                    </label>
-                </div>
-            </div>
-
-            <button id="createBtn" onclick="startCreation()">
+            <button id="createBtn">
                 🚀 START CREATION
             </button>
         </div>
@@ -581,14 +593,14 @@
                     <div class="progress-fill" id="progressFill">0%</div>
                 </div>
             </div>
-            <div id="progressStats" style="margin-top: 15px; color: #00aaff; text-align: center;"></div>
+            <div id="progressStats" style="margin-top: 15px; color: #00aaff; text-align: center; font-weight: bold;"></div>
         </div>
 
         <!-- Live Log -->
         <div class="card">
             <div class="card-title">
                 📝 LIVE ACTIVITY LOG
-                <button class="copy-btn" onclick="clearLog()" style="float: right; background: rgba(255,0,68,0.2);">Clear Log</button>
+                <button id="clearLogBtn" class="copy-btn" style="float: right; background: rgba(255,0,68,0.2);">Clear Log</button>
             </div>
             <div class="log-container" id="logContainer">
                 <div class="log-entry log-info">[SYSTEM] Welcome to CYBER-X Facebook Account Creator</div>
@@ -604,14 +616,14 @@
                 <span style="float: right; font-size: 12px;" id="accountCountDisplay"></span>
             </div>
             <div class="button-group">
-                <button id="refreshBtn" class="btn-success" onclick="loadAccounts()">
+                <button id="refreshBtn" class="btn-success">
                     🔄 Refresh List
                 </button>
-                <button id="clearBtn" class="btn-danger" onclick="clearAccounts()">
-                    🗑️ Delete All Accounts
+                <button id="exportBtn" class="btn-info">
+                    💾 Export to File
                 </button>
-                <button id="exportBtn" class="btn-info" onclick="exportAccounts()">
-                    💾 Export to Text
+                <button id="clearAccountsBtn" class="btn-danger">
+                    🗑️ Delete All
                 </button>
             </div>
             <div class="results-container">
@@ -621,7 +633,7 @@
                             <th>UID</th>
                             <th>Email/Phone</th>
                             <th>Password</th>
-                            <th>Created</th>
+                            <th>Created Date</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -636,6 +648,7 @@
     </div>
 
     <script>
+        // Global variables
         let eventSource = null;
         let successCount = 0;
         let failedCount = 0;
@@ -676,6 +689,15 @@
             document.getElementById('successRate').textContent = `${rate}%`;
         }
 
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                addLog(`Copied to clipboard: ${text}`, 'success');
+            }).catch(() => {
+                addLog('Failed to copy to clipboard', 'error');
+            });
+        }
+
         // Load accounts from server
         async function loadAccounts() {
             try {
@@ -683,8 +705,9 @@
                 const accounts = await response.json();
                 
                 const tbody = document.getElementById('resultsBody');
-                document.getElementById('totalAccounts').textContent = accounts.length;
-                document.getElementById('accountCountDisplay').textContent = `(${accounts.length} total)`;
+                const totalAccounts = accounts.length;
+                document.getElementById('totalAccounts').textContent = totalAccounts;
+                document.getElementById('accountCountDisplay').textContent = `(${totalAccounts} total)`;
                 
                 if (accounts.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No accounts created yet</td></tr>';
@@ -711,28 +734,22 @@
             }
         }
 
-        // Copy to clipboard
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                addLog(`Copied to clipboard: ${text}`, 'success');
-            }).catch(() => {
-                addLog('Failed to copy to clipboard', 'error');
-            });
-        }
-
         // Export accounts
         function exportAccounts() {
-            const table = document.getElementById('resultsTable');
-            const rows = table.querySelectorAll('tbody tr');
-            let exportText = 'UID|Email/Phone|Password|Date|Status\n';
+            const rows = document.querySelectorAll('#resultsBody tr');
+            if (rows.length === 1 && rows[0].cells[0].textContent === 'No accounts created yet') {
+                addLog('No accounts to export', 'error');
+                return;
+            }
             
+            let exportText = 'UID|Email/Phone|Password|Date|Status\n';
             rows.forEach(row => {
-                if (row.cells.length === 5) {
-                    const uid = row.cells[0].innerText.split('Copy')[0].trim();
-                    const email = row.cells[1].innerText;
-                    const password = row.cells[2].innerText.split('Copy')[0].trim();
-                    const date = row.cells[3].innerText;
-                    const status = row.cells[4].innerText;
+                if (row.cells.length === 5 && row.cells[0].textContent !== 'No accounts created yet') {
+                    const uid = row.cells[0].textContent.split('Copy')[0].trim();
+                    const email = row.cells[1].textContent;
+                    const password = row.cells[2].textContent.split('Copy')[0].trim();
+                    const date = row.cells[3].textContent;
+                    const status = row.cells[4].textContent;
                     exportText += `${uid}|${email}|${password}|${date}|${status}\n`;
                 }
             });
@@ -741,10 +758,10 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `cyberx_accounts_${new Date().toISOString().slice(0,19)}.txt`;
+            a.download = `cyberx_accounts_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-            addLog(`Exported ${rows.length} accounts to file`, 'success');
+            addLog(`Exported ${rows.length - 1} accounts to file`, 'success');
         }
 
         // Clear all accounts
@@ -785,16 +802,15 @@
             const passwordType = document.querySelector('input[name="passwordType"]:checked').value;
             const customPassword = document.getElementById('customPassword').value;
             const count = parseInt(document.getElementById('accountCount').value);
-            const showDetails = document.querySelector('input[name="showDetails"]:checked').value;
             
             // Validation
             if (isNaN(count) || count < 1) {
-                addLog('Please enter a valid number of accounts (1-50)', 'error');
+                addLog('Please enter a valid number of accounts (1-20)', 'error');
                 return;
             }
             
-            if (count > 50) {
-                addLog('Maximum 50 accounts per session', 'error');
+            if (count > 20) {
+                addLog('Maximum 20 accounts per session', 'error');
                 return;
             }
             
@@ -823,18 +839,18 @@
             document.getElementById('progressFill').textContent = '0%';
             document.getElementById('progressStats').innerHTML = 'Initializing...';
             
-            addLog(`════════════════════════════════════════`, 'info');
+            addLog('════════════════════════════════════════', 'info');
             addLog(`🚀 Starting creation of ${count} account(s)`, 'info');
-            addLog(`📧 Email Type: ${emailType.toUpperCase()}`, 'info');
+            addLog(`📧 Contact Type: ${emailType.toUpperCase()}`, 'info');
             addLog(`🔑 Password Type: ${passwordType === 'auto' ? 'Auto-generated' : 'Custom'}`, 'info');
             addLog(`🔢 Total: ${count} accounts`, 'info');
-            addLog(`════════════════════════════════════════`, 'info');
+            addLog('════════════════════════════════════════', 'info');
             
             try {
                 const response = await fetch('/api/create-accounts', {
                     method: 'POST',
-                    headers: { 'Content-Type':application/json' },
-                    body: JSON.stringify({ emailType, passwordType, customPassword, count, showDetails })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emailType, passwordType, customPassword, count })
                 });
                 
                 const reader = response.body.getReader();
@@ -858,43 +874,36 @@
                                     successCount++;
                                     updateStatsDisplay();
                                     
-                                    const percent = (data.progress.current / data.progress.total) * 100;
+                                    const percent = ((data.current || 0) / count) * 100;
                                     document.getElementById('progressFill').style.width = `${percent}%`;
                                     document.getElementById('progressFill').textContent = `${Math.round(percent)}%`;
                                     document.getElementById('progressStats').innerHTML = `
-                                        <strong>Progress:</strong> ${data.progress.current}/${data.progress.total} (${Math.round(percent)}%)<br>
-                                        <span style="color: #00ff88;">✅ Successful: ${data.progress.success}</span> | 
-                                        <span style="color: #ff0044;">❌ Failed: ${data.progress.failed}</span>
+                                        ✅ Successful: ${successCount} | ❌ Failed: ${failedCount}<br>
+                                        📊 Progress: ${data.current || 0}/${count} (${Math.round(percent)}%)
                                     `;
                                     
-                                    if (showDetails === 'yes') {
-                                        addLog(`✅ Account #${data.progress.current}: ${data.data.uid} | ${data.data.name} | ${data.data.email} | ${data.data.password}`, 'success');
-                                    } else {
-                                        addLog(`✅ Account #${data.progress.current}: ${data.data.uid} created successfully`, 'success');
-                                    }
-                                    
+                                    addLog(`✅ Account #${data.current}: ${data.data.uid} | ${data.data.email} | ${data.data.password}`, 'success');
                                     loadAccounts();
                                 } else if (data.type === 'error') {
                                     failedCount++;
                                     updateStatsDisplay();
                                     
-                                    const percent = (data.progress.current / data.progress.total) * 100;
+                                    const percent = ((data.current || 0) / count) * 100;
                                     document.getElementById('progressFill').style.width = `${percent}%`;
                                     document.getElementById('progressFill').textContent = `${Math.round(percent)}%`;
                                     document.getElementById('progressStats').innerHTML = `
-                                        <strong>Progress:</strong> ${data.progress.current}/${data.progress.total} (${Math.round(percent)}%)<br>
-                                        <span style="color: #00ff88;">✅ Successful: ${data.progress.success}</span> | 
-                                        <span style="color: #ff0044;">❌ Failed: ${data.progress.failed}</span>
+                                        ✅ Successful: ${successCount} | ❌ Failed: ${failedCount}<br>
+                                        📊 Progress: ${data.current || 0}/${count} (${Math.round(percent)}%)
                                     `;
                                     
-                                    addLog(`❌ Account #${data.progress.current}: ${data.data.error || 'Creation failed'}`, 'error');
+                                    addLog(`❌ Account #${data.current}: ${data.data.error || 'Creation failed'}`, 'error');
                                 } else if (data.type === 'complete') {
-                                    addLog(`════════════════════════════════════════`, 'success');
+                                    addLog('════════════════════════════════════════', 'success');
                                     addLog(`✨ CREATION COMPLETED!`, 'success');
-                                    addLog(`✅ Successful: ${data.results.success.length} accounts`, 'success');
-                                    addLog(`❌ Failed: ${data.results.failed.length} accounts`, 'error');
-                                    addLog(`📊 Success Rate: ${((data.results.success.length / data.results.total) * 100).toFixed(1)}%`, 'info');
-                                    addLog(`════════════════════════════════════════`, 'success');
+                                    addLog(`✅ Successful: ${successCount} accounts`, 'success');
+                                    addLog(`❌ Failed: ${failedCount} accounts`, 'error');
+                                    addLog(`📊 Success Rate: ${((successCount / count) * 100).toFixed(1)}%`, 'info');
+                                    addLog('════════════════════════════════════════', 'success');
                                     
                                     isCreating = false;
                                     createBtn.disabled = false;
@@ -914,6 +923,13 @@
             }
         }
 
+        // Event Listeners
+        document.getElementById('createBtn').addEventListener('click', startCreation);
+        document.getElementById('refreshBtn').addEventListener('click', loadAccounts);
+        document.getElementById('clearAccountsBtn').addEventListener('click', clearAccounts);
+        document.getElementById('exportBtn').addEventListener('click', exportAccounts);
+        document.getElementById('clearLogBtn').addEventListener('click', clearLog);
+        
         // Show/hide custom password field
         document.querySelectorAll('input[name="passwordType"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
@@ -922,18 +938,11 @@
             });
         });
         
-        // Auto-refresh every 10 seconds
-        let refreshInterval = setInterval(loadAccounts, 10000);
-        
         // Load initial data
         loadAccounts();
         
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-        });
+        // Auto-refresh every 15 seconds
+        setInterval(loadAccounts, 15000);
     </script>
 </body>
 </html>
