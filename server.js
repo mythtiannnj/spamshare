@@ -733,9 +733,14 @@ app.get('/tutorial.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tutorial.html'));
 });
 
+app.get('/profile.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+});
+
+
 // Default route - redirect to dashboard
 app.get('/', (req, res) => {
-    res.redirect('/dashboard.html');
+    res.redirect('/index.html');
 });
 
 // ============== 404 ERROR HANDLER ==============
