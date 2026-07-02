@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ShareBoost | Live Session Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://i.imgur.com/vqadMbv.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2073&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px 20px;
+        }
+
+        body.dark-mode {
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        body.dark-mode::before {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 0;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ========== GREETING MODAL ========== */
+        .greeting-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .greeting-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .greeting-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            padding: 45px 50px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+            opacity: 0;
+        }
+
+        .greeting-modal.show .greeting-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        body.dark-mode .greeting-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .greeting-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #ffb3ff, #9effff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+        .greeting-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .greeting-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .greeting-time {
+            color: #4caf50;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-flex;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .greeting-button {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(46, 125, 50, 0.9));
+            border: none;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .greeting-button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+        }
+
+        /* ========== WARNING POPUP ========== */
+        .warning-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 68, 51, 0.3);
+            padding: 35px 40px;
+            max-width: 450px;
+            width: 90%;
+            z-index: 2001;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        .warning-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .warning-popup .popup-icon {
+            font-size: 4rem;
+            color: #ff6644;
+            margin-bottom: 15px;
+            animation: pulseWarning 1.5s infinite;
+        }
+
+        .warning-popup .popup-title {
+            color: #ffaa77;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .warning-popup .popup-message {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .warning-popup .popup-details {
+            background: rgba(255, 68, 51, 0.08);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: left;
+            border: 1px solid rgba(255, 68, 51, 0.1);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .warning-popup .popup-details::-webkit-scrollbar {
+            width: 4px;
+        }
+        .warning-popup .popup-details::-webkit-scrollbar-thumb {
+            background: rgba(255, 68, 51, 0.3);
+            border-radius: 10px;
+        }
+
+        .warning-popup .popup-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .warning-popup .popup-btn {
+            padding: 10px 28px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-popup .popup-btn.primary {
+            background: linear-gradient(135deg, rgba(255, 68, 51, 0.9), rgba(200, 50, 30, 0.9));
+            color: white;
+        }
+
+        .warning-popup .popup-btn.primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 68, 51, 0.3);
+        }
+
+        .warning-popup .popup-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .warning-popup .popup-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode nav {
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active div:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active div:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active div:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        nav img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        body.dark-mode nav img {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        nav h6 {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        #theme-button {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #theme-button:hover {
+            transform: rotate(20deg) scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode #theme-button {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -340px;
+            width: 320px;
+            height: 100vh;
+            background: rgba(10, 10, 30, 0.92);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .sidebar {
+            background: rgba(0, 0, 0, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-header h2 {
+            color: #4caf50;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu {
+            margin-bottom: 25px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 15px 0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            margin-left: 0;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        .main-wrapper.shifted {
+            margin-left: 320px;
+        }
+
+        .wrapper-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== GLASS CARDS ========== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== HEADER ========== */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+
+        .logo-icon {
+            font-size: 48px;
+            background: linear-gradient(135deg, #ffb3ff, #9effff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        h1 {
+            font-size: 40px;
+            font-weight: 800;
+            background: linear-gradient(120deg, #FFFFFF, #f0b3ff, #b6eaff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .tagline {
+            text-align: center;
+            color: rgba(230, 220, 255, 0.7);
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* ========== ACCOUNT WARNING BANNER ========== */
+        .account-warning-banner {
+            background: rgba(255, 68, 51, 0.12);
+            border: 1px solid rgba(255, 68, 51, 0.3);
+            border-radius: 20px;
+            padding: 16px 22px;
+            margin-bottom: 25px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            backdrop-filter: blur(10px);
+            animation: pulseWarning 2s infinite;
+            transition: all 0.3s ease;
+        }
+
+        .account-warning-banner.show {
+            display: flex;
+        }
+
+        @keyframes pulseWarning {
+            0%, 100% { border-color: rgba(255, 68, 51, 0.3); box-shadow: 0 0 0 0 rgba(255, 68, 51, 0.1); }
+            50% { border-color: rgba(255, 100, 70, 0.6); box-shadow: 0 0 20px rgba(255, 68, 51, 0.15); }
+        }
+
+        .account-warning-banner .warning-icon {
+            font-size: 2rem;
+            color: #ff6644;
+            flex-shrink: 0;
+        }
+
+        .account-warning-banner .warning-content {
+            flex: 1;
+        }
+
+        .account-warning-banner .warning-title {
+            color: #ffaa77;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .account-warning-banner .warning-message {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .account-warning-banner .warning-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            padding: 5px;
+        }
+
+        .account-warning-banner .warning-close:hover {
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* ========== STATS ROW ========== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(0, 0, 0, 0.35);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        body.dark-mode .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .stat-card .stat-icon .fas {
+            background: linear-gradient(135deg, #ffb3ff, #9effff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a0ffa0, #00ffaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 255, 100, 0.3);
+            animation: gentleGlow 2s infinite alternate;
+        }
+
+        @keyframes gentleGlow {
+            0% { text-shadow: 0 0 5px rgba(0, 255, 100, 0.2); }
+            100% { text-shadow: 0 0 20px rgba(0, 255, 150, 0.5); }
+        }
+
+        .stat-card .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ========== SESSION CARDS ========== */
+        .session-card {
+            background: rgba(10, 10, 28, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .session-card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        body.dark-mode .session-card {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .session-header {
+            padding: 18px 22px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s;
+        }
+
+        .session-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .session-id {
+            font-weight: 700;
+            color: #dbbaff;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .session-url {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 3px;
+            max-width: 300px;
+            word-break: break-word;
+        }
+
+        .session-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .session-progress {
+            font-weight: 800;
+            background: rgba(0, 30, 0, 0.5);
+            padding: 4px 14px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(0, 255, 150, 0.3);
+        }
+
+        .session-progress i {
+            color: #66ffaa;
+            font-size: 0.7rem;
+        }
+
+        .session-progress .progress-text {
+            background: linear-gradient(135deg, #b0ffb0, #44ffaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .session-status {
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .session-status.running {
+            background: rgba(42, 111, 143, 0.3);
+            color: #8dd0ff;
+            border: 1px solid rgba(58, 168, 255, 0.3);
+        }
+
+        .session-status.completed {
+            background: rgba(31, 122, 85, 0.3);
+            color: #7affb9;
+            border: 1px solid rgba(50, 255, 158, 0.3);
+        }
+
+        .session-status.stopped {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ffb74d;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .session-status.warning {
+            background: rgba(255, 68, 51, 0.2);
+            color: #ff8877;
+            border: 1px solid rgba(255, 68, 51, 0.3);
+            animation: pulseWarning 1.5s infinite;
+        }
+
+        .session-warning-note {
+            font-size: 0.7rem;
+            background: rgba(255, 68, 51, 0.15);
+            border-radius: 16px;
+            padding: 4px 12px;
+            color: #ffb366;
+            margin-top: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .session-chevron {
+            color: rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .session-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .log-details {
+            padding: 0 22px 18px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-details.open {
+            display: block;
+            animation: fadeSlide 0.3s ease;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-entry {
+            font-size: 0.75rem;
+            font-family: monospace;
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(200, 200, 255, 0.8);
+        }
+
+        .log-entry .log-time {
+            color: rgba(150, 140, 255, 0.6);
+            margin-right: 12px;
+        }
+
+        .log-entry.warning {
+            background: rgba(255, 80, 40, 0.08);
+            border-left: 2px solid #ff6644;
+        }
+
+        .log-entry .log-warning-icon {
+            color: #ff8855;
+            margin-left: 8px;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 25px 20px 10px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+        }
+
+        .footer i {
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
+
+        .footer .heart {
+            color: #ff6b6b;
+            animation: heartbeat 1.5s ease infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        body.dark-mode .footer {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 760px) {
+            .glass-card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 30px;
+            }
+            .logo-icon {
+                font-size: 38px;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-card .stat-number {
+                font-size: 2rem;
+            }
+            nav {
+                padding: 10px 16px;
+            }
+            nav h6 {
+                display: none;
+            }
+            .main-wrapper.shifted {
+                margin-left: 0;
+            }
+            .sidebar {
+                width: 300px;
+                left: -320px;
+            }
+            #theme-button {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+            .session-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .session-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .greeting-card {
+                padding: 30px 25px;
+            }
+            .greeting-title {
+                font-size: 1.5rem;
+            }
+            .warning-popup {
+                padding: 25px 20px;
+                width: 95%;
+            }
+            .warning-popup .popup-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 16px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .logo-icon {
+                font-size: 30px;
+            }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            .stat-card .stat-number {
+                font-size: 1.8rem;
+            }
+            .greeting-card {
+                padding: 25px 18px;
+            }
+            .greeting-title {
+                font-size: 1.3rem;
+            }
+            .warning-popup {
+                padding: 20px 16px;
+            }
+            .warning-popup .popup-title {
+                font-size: 1.1rem;
+            }
+            .warning-popup .popup-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== GREETING MODAL ========== -->
+    <div class="greeting-modal" id="greetingModal">
+        <div class="greeting-card">
+            <div class="greeting-icon">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <h2 class="greeting-title">📋 Session Logs</h2>
+            <p class="greeting-subtitle">
+                Real-time monitoring of all sharing sessions with automatic account health detection.
+            </p>
+            <div class="greeting-time">
+                <i class="fas fa-clock"></i>
+                <span id="greetingTimeDisplay">Loading...</span>
+            </div>
+            <button class="greeting-button" onclick="closeGreetingModal()">
+                <i class="fas fa-eye"></i> View Logs
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== WARNING POPUP ========== -->
+    <div class="warning-popup" id="warningPopup">
+        <div class="popup-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="popup-title" id="popupTitle">⚠️ Account Warning Detected</div>
+        <div class="popup-message" id="popupMessage">
+            One or more active sessions have detected account issues. Please review your credentials immediately.
+        </div>
+        <div class="popup-details" id="popupDetails">
+            <strong>⚠️ Detected Issues:</strong><br>
+            <span id="popupIssueList">Loading warning details...</span>
+        </div>
+        <div class="popup-actions">
+            <button class="popup-btn primary" onclick="closeWarningPopup()">
+                <i class="fas fa-check-circle"></i> I Understand
+            </button>
+            <button class="popup-btn secondary" onclick="closeWarningPopup()">
+                <i class="fas fa-times"></i> Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav>
+        <div class="navbar-left">
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <img src="https://i.imgur.com/vqadMbv.png" alt="logo" id="navLogo">
+            <h6 id="navTitle">ShareBoost</h6>
+        </div>
+        <i class="fas fa-moon" id="theme-button"></i>
+    </nav>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Menu</h2>
+            <div class="subtitle">ShareBoost Navigation</div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span class="menu-text">HOME</span>
+            </a>
+            <a href="/logs.html" class="menu-item active">
+                <i class="fas fa-scroll"></i>
+                <span class="menu-text">LOGS</span>
+            </a>
+            <a href="/api-docs.html" class="menu-item">
+                <i class="fas fa-code"></i>
+                <span class="menu-text">API DOCS</span>
+            </a>
+            <a href="/tutorial.html" class="menu-item">
+                <i class="fas fa-book-open"></i>
+                <span class="menu-text">TUTORIAL</span>
+            </a>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="sidebar-menu">
+            <a href="/profile" class="menu-item">
+                <i class="fas fa-user"></i>
+                <span class="menu-text">PROFILE</span>
+            </a>
+            <a href="/settings" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span class="menu-text">SETTINGS</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========== OVERLAY ========== -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="wrapper-container">
+            <!-- Header -->
+            <div class="glass-card fade-in">
+                <div class="logo-container">
+                    <i class="fas fa-scroll logo-icon"></i>
+                    <h1>Live Session Logs</h1>
+                </div>
+                <p class="tagline">Real-time sharing activity & detailed session logs + account lock detection</p>
+            </div>
+
+            <!-- ====== ACCOUNT WARNING BANNER ====== -->
+            <div class="account-warning-banner" id="globalWarningBanner">
+                <div class="warning-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="warning-content">
+                    <div class="warning-title">⚠️ Account Warning Detected</div>
+                    <div class="warning-message" id="warningMessageText">One or more sessions indicate account lock, suspension or share stop. Please verify your credentials.</div>
+                </div>
+                <button class="warning-close" onclick="dismissWarning()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- ====== STATS ROW ====== -->
+            <div class="stats-row fade-in">
+                <div class="stat-card">
+                    <span class="stat-icon"><i class="fas fa-chart-line"></i></span>
+                    <div class="stat-number" id="logs-total-shares">0</div>
+                    <div class="stat-label">Total Shares</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon"><i class="fas fa-play-circle"></i></span>
+                    <div class="stat-number" id="logs-active-sessions">0</div>
+                    <div class="stat-label">Active Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon"><i class="fas fa-stop-circle"></i></span>
+                    <div class="stat-number" id="logs-stopped-sessions">0</div>
+                    <div class="stat-label">Stopped</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div class="stat-number" id="logs-warning-sessions">0</div>
+                    <div class="stat-label">⚠️ Warnings</div>
+                </div>
+            </div>
+
+            <!-- ====== SESSIONS LOGS ====== -->
+            <div class="glass-card fade-in">
+                <div id="sessionLogsList">
+                    <div style="padding: 30px; text-align: center; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-spinner fa-pulse"></i> Loading sessions...
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== FOOTER ====== -->
+            <div class="footer">
+                <i class="fas fa-copyright"></i> 2026 All Rights Reserved.
+                <i class="fas fa-heart heart"></i> Made with <span style="color: #ff6b6b;">❤</span> by ShareBoost Team
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== SIDEBAR FUNCTIONS ==========
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const hamburger = document.getElementById('hamburger');
+            const mainWrapper = document.getElementById('mainWrapper');
+
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+
+            if (window.innerWidth > 768) {
+                mainWrapper.classList.toggle('shifted');
+            }
+        }
+
+        function closeMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const hamburger = document.getElementById('hamburger');
+            const mainWrapper = document.getElementById('mainWrapper');
+
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            mainWrapper.classList.remove('shifted');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburger');
+
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                    closeMenu();
+                }
+            }
+        });
+
+        // ========== THEME TOGGLE ==========
+        const themeButton = document.getElementById('theme-button');
+        const savedTheme = localStorage.getItem('shareboost-theme');
+
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeButton.className = 'fas fa-sun';
+        }
+
+        themeButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeButton.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('shareboost-theme', isDark ? 'dark' : 'light');
+        });
+
+        // ========== GREETING MODAL ==========
+        function showGreetingModal() {
+            const modal = document.getElementById('greetingModal');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('greetingTimeDisplay').textContent = timeStr;
+            modal.classList.add('show');
+
+            // Auto-close after 4 seconds
+            setTimeout(() => {
+                closeGreetingModal();
+            }, 4000);
+        }
+
+        function closeGreetingModal() {
+            const modal = document.getElementById('greetingModal');
+            modal.classList.remove('show');
+        }
+
+        // ========== WARNING POPUP ==========
+        let warningPopupShown = false;
+
+        function showWarningPopup(title, message, issues) {
+            if (warningPopupShown) return;
+
+            document.getElementById('popupTitle').textContent = title;
+            document.getElementById('popupMessage').textContent = message;
+            document.getElementById('popupIssueList').textContent = issues || 'No specific issues found.';
+            document.getElementById('warningPopup').classList.add('show');
+            warningPopupShown = true;
+        }
+
+        function closeWarningPopup() {
+            document.getElementById('warningPopup').classList.remove('show');
+        }
+
+        // ========== FADE-IN ANIMATION ==========
+        function handleScrollAnimation() {
+            const elements = document.querySelectorAll('.fade-in');
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 80) {
+                    el.classList.add('visible');
+                }
+            }
+        }
+
+        window.addEventListener('scroll', handleScrollAnimation);
+
+        // ========== WARNING BANNER ==========
+        function showWarningBanner(message) {
+            const banner = document.getElementById('globalWarningBanner');
+            document.getElementById('warningMessageText').textContent = message;
+            banner.classList.add('show');
+        }
+
+        function dismissWarning() {
+            document.getElementById('globalWarningBanner').classList.remove('show');
+        }
+
+        // ========== DETECT ACCOUNT WARNING FROM LOGS ==========
+        function detectAccountWarning(logsArray) {
+            if (!logsArray || !logsArray.length) return null;
+            const keywords = [
+                "account locked", "account suspended", "account disabled", "login required",
+                "authentication failed", "session expired", "token invalid", "unauthorized",
+                "share stopped", "sharing failed", "cannot share", "rate limit exceeded",
+                "blocked", "captcha required", "verification needed", "access denied",
+                "suspicious activity", "temporary lock", "profile restricted",
+                "error 403", "error 401", "forbidden", "invalid credentials"
+            ];
+            for (let log of logsArray) {
+                const message = (log.action + " " + (typeof log.data === 'string' ? log.data : JSON.stringify(log.data))).toLowerCase();
+                for (let kw of keywords) {
+                    if (message.includes(kw)) {
+                        return { reason: kw, rawLog: log };
+                    }
+                }
+                if (log.action === "share_error" || log.action === "share_stop" || log.action === "critical_failure") {
+                    return { reason: "Share process stopped due to account restriction", rawLog: log };
+                }
+            }
+            return null;
+        }
+
+        // ========== FETCH SESSIONS AND LOGS ==========
+        let activeRefresh = null;
+        let warningSessions = new Set();
+        let popupShownForSessions = new Set();
+
+        async function fetchSessionsAndLogs() {
+            try {
+                const res = await fetch('/api/sessions/summary');
+                const data = await res.json();
+                if (!data.success) throw new Error('summary fail');
+
+                const sessions = data.sessions || [];
+                const totals = data.totals || { totalShares: 0, activeSessions: 0, stoppedSessions: 0 };
+
+                const activeCount = sessions.filter(s => s.status === 'running').length;
+                const stoppedCount = sessions.filter(s => s.status === 'stopped' || s.status === 'completed').length;
+                const finalTotalShares = totals.totalShares !== undefined ? totals.totalShares : sessions.reduce((sum, s) => sum + (s.sharedCount || 0), 0);
+
+                document.getElementById('logs-total-shares').textContent = finalTotalShares;
+                document.getElementById('logs-active-sessions').textContent = activeCount;
+                document.getElementById('logs-stopped-sessions').textContent = stoppedCount;
+
+                const container = document.getElementById('sessionLogsList');
+                if (sessions.length === 0) {
+                    container.innerHTML = '<div style="padding: 30px; text-align: center; color: rgba(255,255,255,0.5);">✨ No active or stopped sessions ✨</div>';
+                    return;
+                }
+
+                // Build session cards
+                let html = '';
+                let warningCount = 0;
+                let warningMessages = [];
+
+                for (const sess of sessions) {
+                    // Determine status: running, stopped, or warning
+                    let statusClass = 'running';
+                    let statusText = 'PROCESSING';
+                    let statusIcon = 'fa-sync-alt fa-spin';
+
+                    // Check for warnings first
+                    const logRes = await fetch(`/api/session/${sess.sessionId}/logs`).catch(() => null);
+                    let warning = null;
+                    let hasWarning = false;
+                    let warningReason = '';
+
+                    if (logRes && logRes.ok) {
+                        const logData = await logRes.json();
+                        if (logData.success && logData.logs) {
+                            warning = detectAccountWarning(logData.logs);
+                            if (warning) {
+                                hasWarning = true;
+                                warningReason = warning.reason;
+                                warningCount++;
+                                warningSessions.add(sess.sessionId);
+                                warningMessages.push(`Session ${sess.sessionId.substring(0, 10)}...: ${warningReason}`);
+
+                                if (!popupShownForSessions.has(sess.sessionId)) {
+                                    popupShownForSessions.add(sess.sessionId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Set status based on session status + warning
+                    if (hasWarning) {
+                        statusClass = 'warning';
+                        statusText = '⚠️ WARNING';
+                        statusIcon = 'fa-exclamation-triangle';
+                    } else if (sess.status === 'running') {
+                        statusClass = 'running';
+                        statusText = 'PROCESSING';
+                        statusIcon = 'fa-sync-alt fa-spin';
+                    } else {
+                        statusClass = 'stopped';
+                        statusText = 'STOPPED';
+                        statusIcon = 'fa-stop-circle';
+                    }
+
+                    const shareProgress = `${sess.sharedCount || 0}/${sess.targetAmount || 0}`;
+
+                    // Build log entries preview
+                    let logPreview = '';
+                    if (logRes && logRes.ok) {
+                        const logData = await logRes.json();
+                        if (logData.success && logData.logs) {
+                            const logs = logData.logs.slice(-10);
+                            logPreview = logs.map(log => {
+                                const logText = typeof log.data === 'object' ? JSON.stringify(log.data) : (log.data || '');
+                                const isWarning = detectAccountWarning([log]) !== null;
+                                return `
+                                    <div class="log-entry ${isWarning ? 'warning' : ''}">
+                                        <span class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                                        <span><strong>${escapeHtml(log.action)}</strong></span>
+                                        <span style="color:rgba(200,200,255,0.6);">${escapeHtml(logText.substring(0, 100))}</span>
+                                        ${isWarning ? '<i class="fas fa-exclamation-triangle log-warning-icon"></i>' : ''}
+                                    </div>
+                                `;
+                            }).join('');
+                        }
+                    }
+
+                    const warningNoteHtml = hasWarning ? `
+                        <div class="session-warning-note">
+                            <i class="fas fa-lock"></i> ${escapeHtml(warningReason.substring(0, 70))}
+                        </div>
+                    ` : '';
+
+                    html += `
+                        <div class="session-card" data-session="${sess.sessionId}">
+                            <div class="session-header" onclick="toggleLogs('${sess.sessionId}')">
+                                <div>
+                                    <div class="session-id"><i class="fas fa-microchip"></i> ${sess.sessionId.substring(0, 18)}...</div>
+                                    <div class="session-url">${sess.url ? sess.url.substring(0, 65) : 'No URL'}</div>
+                                    ${warningNoteHtml}
+                                </div>
+                                <div class="session-right">
+                                    <span class="session-progress">
+                                        <i class="fas fa-share-alt"></i>
+                                        <span class="progress-text">${shareProgress}</span>
+                                    </span>
+                                    <span class="session-status ${statusClass}">
+                                        <i class="fas ${statusIcon}"></i> ${statusText}
+                                    </span>
+                                    <span class="session-chevron" id="chevron-${sess.sessionId}">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="log-details" id="logs-${sess.sessionId}">
+                                ${logPreview || '<div style="padding: 12px; color: rgba(255,255,255,0.4);">📭 No detailed logs yet.</div>'}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('logs-warning-sessions').textContent = warningCount;
+
+                // Show warning popup if there are warnings
+                if (warningCount > 0 && !warningPopupShown) {
+                    const issuesList = warningMessages.join('\n');
+                    showWarningPopup(
+                        `⚠️ ${warningCount} Account Warning(s) Detected`,
+                        'One or more active sessions have detected account issues. Please review your credentials immediately.',
+                        issuesList
+                    );
+                    showWarningBanner(`⚠️ ${warningCount} session(s) have detected account issues. Please check your credentials.`);
+                } else if (warningCount > 0) {
+                    showWarningBanner(`⚠️ ${warningCount} session(s) have detected account issues. Please check your credentials.`);
+                } else {
+                    dismissWarning();
+                }
+
+                container.innerHTML = html;
+
+            } catch (err) {
+                console.error("Session fetch error:", err);
+            }
+        }
+
+        // ========== TOGGLE LOGS ==========
+        function toggleLogs(sessionId) {
+            const logDiv = document.getElementById(`logs-${sessionId}`);
+            const chevron = document.getElementById(`chevron-${sessionId}`);
+            if (!logDiv) return;
+
+            logDiv.classList.toggle('open');
+            if (chevron) {
+                chevron.classList.toggle('open');
+            }
+
+            if (logDiv.classList.contains('open') && logDiv.innerHTML.includes('No detailed logs')) {
+                fetchFreshLogs(sessionId);
+            }
+        }
+
+        async function fetchFreshLogs(sessionId) {
+            const logDiv = document.getElementById(`logs-${sessionId}`);
+            if (!logDiv) return;
+
+            logDiv.innerHTML = '<div style="padding: 12px; color: rgba(255,255,255,0.5);"><i class="fas fa-spinner fa-pulse"></i> Loading logs...</div>';
+
+            try {
+                const res = await fetch(`/api/session/${sessionId}/logs`);
+                const data = await res.json();
+                if (data.success && data.logs) {
+                    const logs = data.logs.slice(-50);
+                    const logsHtml = logs.map(log => {
+                        const logText = typeof log.data === 'object' ? JSON.stringify(log.data) : (log.data || '');
+                        const isWarning = detectAccountWarning([log]) !== null;
+                        return `
+                            <div class="log-entry ${isWarning ? 'warning' : ''}">
+                                <span class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                                <span><strong>${escapeHtml(log.action)}</strong></span>
+                                <span style="color:rgba(200,200,255,0.6);">${escapeHtml(logText.substring(0, 140))}</span>
+                                ${isWarning ? '<i class="fas fa-exclamation-triangle log-warning-icon"></i>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    logDiv.innerHTML = logsHtml || '<div style="padding: 12px; color: rgba(255,255,255,0.4);">📭 No logs available.</div>';
+                } else {
+                    logDiv.innerHTML = '<div style="padding: 12px; color: rgba(255,255,255,0.4);">Failed to load logs.</div>';
+                }
+            } catch (err) {
+                logDiv.innerHTML = '<div style="padding: 12px; color: #ff6b6b;">Error loading logs.</div>';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // ========== DETECT WARNINGS ON LOAD ==========
+        async function checkForInitialWarnings() {
+            try {
+                const res = await fetch('/api/sessions/summary');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const sessions = data.sessions || [];
+                let warnings = [];
+
+                for (const sess of sessions) {
+                    const logRes = await fetch(`/api/session/${sess.sessionId}/logs`).catch(() => null);
+                    if (logRes && logRes.ok) {
+                        const logData = await logRes.json();
+                        if (logData.success && logData.logs) {
+                            const warning = detectAccountWarning(logData.logs);
+                            if (warning) {
+                                warnings.push(`Session ${sess.sessionId.substring(0, 10)}...: ${warning.reason}`);
+                            }
+                        }
+                    }
+                }
+
+                if (warnings.length > 0) {
+                    setTimeout(() => {
+                        showWarningPopup(
+                            `⚠️ ${warnings.length} Account Warning(s) Detected`,
+                            'One or more active sessions have detected account issues. Please review your credentials immediately.',
+                            warnings.join('\n')
+                        );
+                    }, 1200);
+                }
+            } catch (err) {
+                console.error('Initial warning check error:', err);
+            }
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('load', function() {
+            showGreetingModal();
+
+            setTimeout(() => {
+                fetchSessionsAndLogs();
+                checkForInitialWarnings();
+            }, 300);
+
+            if (activeRefresh) clearInterval(activeRefresh);
+            activeRefresh = setInterval(fetchSessionsAndLogs, 5000);
+            handleScrollAnimation();
+        });
+
+        window.addEventListener('scroll', handleScrollAnimation);
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                fetchSessionsAndLogs();
+            }
+        });
+    </script>
+</body>
+</html>
