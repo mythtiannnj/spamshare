@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ShareBoost | Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://i.imgur.com/vqadMbv.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2073&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px 20px;
+        }
+
+        body.dark-mode {
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        body.dark-mode::before {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 0;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ========== GREETING MODAL ========== */
+        .greeting-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .greeting-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .greeting-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            padding: 45px 50px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+            opacity: 0;
+        }
+
+        .greeting-modal.show .greeting-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        body.dark-mode .greeting-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .greeting-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #ffb3ff, #9effff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+        .greeting-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .greeting-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .greeting-time {
+            color: #4caf50;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-flex;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .greeting-button {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(46, 125, 50, 0.9));
+            border: none;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .greeting-button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode nav {
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active div:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active div:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active div:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        nav img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        body.dark-mode nav img {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        nav h6 {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        #theme-button {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #theme-button:hover {
+            transform: rotate(20deg) scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode #theme-button {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -340px;
+            width: 320px;
+            height: 100vh;
+            background: rgba(10, 10, 30, 0.92);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .sidebar {
+            background: rgba(0, 0, 0, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-header h2 {
+            color: #4caf50;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu {
+            margin-bottom: 25px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 15px 0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            margin-left: 0;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        .main-wrapper.shifted {
+            margin-left: 320px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== GLASS CARDS ========== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            padding: 35px 40px;
+            margin-bottom: 25px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== PROFILE HEADER ========== */
+        .profile-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .profile-avatar-wrapper {
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-avatar-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #4caf50;
+            border-radius: 50%;
+            padding: 8px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-username {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 12px;
+        }
+
+        .profile-username span {
+            color: #4caf50;
+        }
+
+        .profile-bio {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-width: 500px;
+        }
+
+        /* ========== PROFILE STATS ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 18px 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(0, 0, 0, 0.35);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a0ffa0, #00ffaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-item .stat-label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .stat-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            padding: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .stat-loading i {
+            color: #4caf50;
+        }
+
+        /* ========== CONTACT SECTION ========== */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            cursor: default;
+        }
+
+        .contact-item:hover {
+            background: rgba(0, 0, 0, 0.35);
+            transform: translateX(5px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-item .contact-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .contact-item .contact-icon.email {
+            background: rgba(255, 255, 255, 0.08);
+            color: #64b5f6;
+        }
+
+        .contact-item .contact-icon.phone {
+            background: rgba(255, 255, 255, 0.08);
+            color: #81c784;
+        }
+
+        .contact-item .contact-icon.location {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffb74d;
+        }
+
+        .contact-item .contact-icon.website {
+            background: rgba(255, 255, 255, 0.08);
+            color: #4dd0e1;
+        }
+
+        .contact-item .contact-details {
+            flex: 1;
+        }
+
+        .contact-item .contact-details .label {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-item .contact-details .value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .contact-item .contact-details .value.na {
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+        }
+
+        /* ========== SOCIAL LINKS ========== */
+        .social-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            cursor: default;
+        }
+
+        .social-link.na {
+            opacity: 0.5;
+        }
+
+        .social-link i {
+            font-size: 1.1rem;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 25px 20px 10px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+        }
+
+        .footer i {
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
+
+        .footer .heart {
+            color: #ff6b6b;
+            animation: heartbeat 1.5s ease infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        body.dark-mode .footer {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 760px) {
+            .glass-card {
+                padding: 24px;
+            }
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+            }
+            .profile-name {
+                font-size: 1.6rem;
+            }
+            .profile-bio {
+                max-width: 100%;
+                text-align: center;
+            }
+            nav {
+                padding: 10px 16px;
+            }
+            nav h6 {
+                display: none;
+            }
+            .main-wrapper.shifted {
+                margin-left: 0;
+            }
+            .sidebar {
+                width: 300px;
+                left: -320px;
+            }
+            #theme-button {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+            .greeting-card {
+                padding: 30px 25px;
+            }
+            .greeting-title {
+                font-size: 1.5rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 18px;
+            }
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            .profile-name {
+                font-size: 1.3rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-item .stat-number {
+                font-size: 1.4rem;
+            }
+            .greeting-card {
+                padding: 25px 18px;
+            }
+            .greeting-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== GREETING MODAL ========== -->
+    <div class="greeting-modal" id="greetingModal">
+        <div class="greeting-card">
+            <div class="greeting-icon">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h2 class="greeting-title">👤 Profile</h2>
+            <p class="greeting-subtitle">
+                View and manage your personal information and contact details.
+            </p>
+            <div class="greeting-time">
+                <i class="fas fa-clock"></i>
+                <span id="greetingTimeDisplay">Loading...</span>
+            </div>
+            <button class="greeting-button" onclick="closeGreetingModal()">
+                <i class="fas fa-eye"></i> View Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav>
+        <div class="navbar-left">
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <div></div><div></div><div></div>
+            </div>
+            <img src="https://i.imgur.com/vqadMbv.png" alt="logo" id="navLogo">
+            <h6 id="navTitle">ShareBoost</h6>
+        </div>
+        <i class="fas fa-moon" id="theme-button"></i>
+    </nav>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Menu</h2>
+            <div class="subtitle">ShareBoost Navigation</div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span class="menu-text">HOME</span>
+            </a>
+            <a href="/logs.html" class="menu-item">
+                <i class="fas fa-scroll"></i>
+                <span class="menu-text">LOGS</span>
+            </a>
+            <a href="/api-docs.html" class="menu-item">
+                <i class="fas fa-code"></i>
+                <span class="menu-text">API DOCS</span>
+            </a>
+            <a href="/tutorial.html" class="menu-item">
+                <i class="fas fa-book-open"></i>
+                <span class="menu-text">TUTORIAL</span>
+            </a>
+            <a href="/profile.html" class="menu-item active">
+                <i class="fas fa-user"></i>
+                <span class="menu-text">PROFILE</span>
+            </a>
+            <a href="/settings.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span class="menu-text">SETTINGS</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========== OVERLAY ========== -->
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="container">
+            <!-- Profile Card -->
+            <div class="glass-card fade-in">
+                <div class="profile-header">
+                    <div class="profile-avatar-wrapper">
+                        <img src="https://iili.io/CYqJCOb.jpg" alt="Profile Avatar" class="profile-avatar">
+                        <div class="profile-avatar-badge">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">Heemskerk</div>
+                        <div class="profile-username">
+                            <i class="fas fa-at" style="color: #4caf50;"></i> @heemskerk
+                        </div>
+                        <div class="profile-bio">
+                            🚀 ShareBoost Manager
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Card - Dynamic from API -->
+            <div class="glass-card fade-in">
+                <h2 style="font-size: 1.3rem; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-chart-line" style="color: #4caf50;"></i> Activity Stats
+                </h2>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-loading">
+                        <i class="fas fa-spinner fa-pulse"></i> Loading stats...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Card -->
+            <div class="glass-card fade-in">
+                <h2 style="font-size: 1.3rem; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-address-card" style="color: #4caf50;"></i> Contact Information
+                </h2>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <div class="contact-icon email"><i class="fas fa-envelope"></i></div>
+                        <div class="contact-details">
+                            <div class="label">Email</div>
+                            <div class="value">heemskerk@yopmail.com</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon phone"><i class="fas fa-phone"></i></div>
+                        <div class="contact-details">
+                            <div class="label">Phone</div>
+                            <div class="value na">N/A</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon location"><i class="fas fa-map-pin"></i></div>
+                        <div class="contact-details">
+                            <div class="label">Location</div>
+                            <div class="value na">N/A</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon website"><i class="fas fa-globe"></i></div>
+                        <div class="contact-details">
+                            <div class="label">Website</div>
+                            <div class="value na">N/A</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links Card -->
+            <div class="glass-card fade-in">
+                <h2 style="font-size: 1.3rem; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-share-alt" style="color: #4caf50;"></i> Social Media
+                </h2>
+                <div class="social-links">
+                    <span class="social-link na"><i class="fab fa-facebook"></i> N/A</span>
+                    <span class="social-link na"><i class="fab fa-twitter"></i> N/A</span>
+                    <span class="social-link na"><i class="fab fa-instagram"></i> N/A</span>
+                    <span class="social-link na"><i class="fab fa-tiktok"></i> N/A</span>
+                    <span class="social-link na"><i class="fab fa-github"></i> N/A</span>
+                    <span class="social-link na"><i class="fab fa-linkedin"></i> N/A</span>
+                </div>
+            </div>
+
+            <!-- ====== FOOTER ====== -->
+            <div class="footer">
+                <i class="fas fa-copyright"></i> 2026 All Rights Reserved.
+                <i class="fas fa-heart heart"></i> Made with <span style="color: #ff6b6b;">❤</span> by ShareBoost Team
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== SIDEBAR FUNCTIONS ==========
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const hamburger = document.getElementById('hamburger');
+            const mainWrapper = document.getElementById('mainWrapper');
+
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+
+            if (window.innerWidth > 768) {
+                mainWrapper.classList.toggle('shifted');
+            }
+        }
+
+        function closeMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const hamburger = document.getElementById('hamburger');
+            const mainWrapper = document.getElementById('mainWrapper');
+
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            mainWrapper.classList.remove('shifted');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburger');
+
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                    closeMenu();
+                }
+            }
+        });
+
+        // ========== THEME TOGGLE ==========
+        const themeButton = document.getElementById('theme-button');
+        const savedTheme = localStorage.getItem('shareboost-theme');
+
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeButton.className = 'fas fa-sun';
+        }
+
+        themeButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeButton.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('shareboost-theme', isDark ? 'dark' : 'light');
+        });
+
+        // ========== GREETING MODAL ==========
+        function showGreetingModal() {
+            const modal = document.getElementById('greetingModal');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('greetingTimeDisplay').textContent = timeStr;
+            modal.classList.add('show');
+
+            setTimeout(() => {
+                closeGreetingModal();
+            }, 4000);
+        }
+
+        function closeGreetingModal() {
+            document.getElementById('greetingModal').classList.remove('show');
+        }
+
+        // ========== FADE-IN ANIMATION ==========
+        function handleScrollAnimation() {
+            document.querySelectorAll('.fade-in').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 80) {
+                    el.classList.add('visible');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', handleScrollAnimation);
+
+        // ========== FETCH STATS FROM API ==========
+        async function fetchStats() {
+            const statsGrid = document.getElementById('statsGrid');
+
+            try {
+                const response = await fetch('/api/sessions/summary');
+                const data = await response.json();
+
+                if (data.success) {
+                    const sessions = data.sessions || [];
+                    const totals = data.totals || { totalShares: 0, activeSessions: 0, completedSessions: 0 };
+
+                    // Calculate stats from sessions data
+                    let totalShares = 0;
+                    let activeSessions = 0;
+                    let completedSessions = 0;
+                    let failedSessions = 0;
+
+                    sessions.forEach(session => {
+                        totalShares += session.sharedCount || 0;
+                        if (session.status === 'running') activeSessions++;
+                        else if (session.status === 'completed') completedSessions++;
+                        else failedSessions++;
+                    });
+
+                    // Calculate success rate
+                    const totalCompleted = completedSessions + failedSessions;
+                    const successRate = totalCompleted > 0 ? Math.round((completedSessions / totalCompleted) * 100) : 0;
+
+                    // Update stats grid
+                    statsGrid.innerHTML = `
+                        <div class="stat-item">
+                            <div class="stat-number">${totalShares.toLocaleString()}</div>
+                            <div class="stat-label">Total Shares</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${activeSessions}</div>
+                            <div class="stat-label">Active Sessions</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${successRate}%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${completedSessions}</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    `;
+                } else {
+                    statsGrid.innerHTML = `
+                        <div class="stat-loading" style="color: #ff6b6b;">
+                            <i class="fas fa-exclamation-triangle"></i> Failed to load stats
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                statsGrid.innerHTML = `
+                    <div class="stat-loading" style="color: #ff6b6b;">
+                        <i class="fas fa-exclamation-triangle"></i> Error loading stats
+                    </div>
+                `;
+            }
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('load', function() {
+            setTimeout(showGreetingModal, 500);
+            handleScrollAnimation();
+            fetchStats();
+        });
+
+        // Refresh stats every 10 seconds
+        setInterval(fetchStats, 10000);
+    </script>
+</body>
+</html>
