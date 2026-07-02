@@ -1373,7 +1373,7 @@
 
                     if (sess.hasWarning) {
                         statusClass = 'warning';
-                        statusText = '⚠️ WARNING';
+                        statusText = 'WARNING';
                         statusIcon = 'fa-exclamation-triangle';
                         progressFillClass = 'warning';
                     } else if (sess.status === 'running') {
@@ -1383,12 +1383,12 @@
                         progressFillClass = '';
                     } else if (sess.status === 'completed') {
                         statusClass = 'completed';
-                        statusText = '✅ COMPLETED';
+                        statusText = 'COMPLETED';
                         statusIcon = 'fa-check-circle';
                         progressFillClass = 'completed';
                     } else {
                         statusClass = 'stopped';
-                        statusText = '⛔ STOPPED';
+                        statusText = 'STOPPED';
                         statusIcon = 'fa-stop-circle';
                         progressFillClass = 'stopped';
                     }
