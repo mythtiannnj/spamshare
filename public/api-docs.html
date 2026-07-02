@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ShareBoost | API Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://i.imgur.com/vqadMbv.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2073&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px 20px;
+        }
+
+        body.dark-mode {
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        body.dark-mode::before { background: rgba(0, 0, 0, 0.7); }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 0;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== GREETING MODAL ===== */
+        .greeting-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .greeting-modal.show { opacity: 1; visibility: visible; }
+        .greeting-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(25px);
+            border-radius: 35px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 45px 50px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+            opacity: 0;
+        }
+        .greeting-modal.show .greeting-card { transform: scale(1) translateY(0); opacity: 1; }
+        body.dark-mode .greeting-card { background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.08); }
+        .greeting-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #ffb3ff, #9effff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            animation: wave 2s ease-in-out infinite;
+        }
+        @keyframes wave { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
+        .greeting-title { color: white; font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .greeting-subtitle { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 20px; }
+        .greeting-time {
+            color: #4caf50;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .greeting-button {
+            background: linear-gradient(135deg, rgba(76,175,80,0.9), rgba(46,125,50,0.9));
+            border: none;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(76,175,80,0.3);
+        }
+        .greeting-button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 35px rgba(76,175,80,0.4); }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        body.dark-mode nav { background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .navbar-left { display: flex; align-items: center; gap: 20px; }
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+            z-index: 1001;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+        .hamburger.active div:nth-child(2) { opacity: 0; }
+        .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px,-7px); }
+        nav img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.4); }
+        body.dark-mode nav img { border-color: rgba(255,255,255,0.2); }
+        nav h6 { color: rgba(255,255,255,0.95); font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; }
+        #theme-button {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #theme-button:hover { transform: rotate(20deg) scale(1.05); background: rgba(255,255,255,0.2); }
+        body.dark-mode #theme-button { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.05); }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -340px;
+            width: 320px;
+            height: 100vh;
+            background: rgba(10,10,30,0.92);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            transition: left 0.4s cubic-bezier(0.4,0,0.2,1);
+            z-index: 999;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+        body.dark-mode .sidebar { background: rgba(0,0,0,0.95); }
+        .sidebar.active { left: 0; }
+        .sidebar-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-header h2 { color: #4caf50; font-size: 1.5rem; margin-bottom: 5px; font-weight: 700; }
+        .subtitle { color: rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; }
+        .sidebar-menu { margin-bottom: 25px; }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .menu-item:hover { background: rgba(76,175,80,0.2); color: white; transform: translateX(5px); }
+        .menu-item.active { background: rgba(76,175,80,0.3); color: white; }
+        .menu-item i { width: 24px; font-size: 1.1rem; text-align: center; }
+        .menu-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 15px 0; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .overlay.active { display: block; opacity: 1; }
+
+        /* ===== MAIN ===== */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            margin-left: 0;
+            transition: margin-left 0.4s cubic-bezier(0.4,0,0.2,1);
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+        .main-wrapper.shifted { margin-left: 320px; }
+        .container { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .glass-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            padding: 35px 40px;
+            margin-bottom: 25px;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(0,0,0,0.12); border-color: rgba(255,255,255,0.25); }
+        body.dark-mode .glass-card { background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+        .logo-icon {
+            font-size: 48px;
+            background: linear-gradient(135deg, #ffb3ff, #9effff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        h1 { font-size: 40px; font-weight: 800; background: linear-gradient(120deg, #FFFFFF, #f0b3ff, #b6eaff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .tagline { text-align: center; color: rgba(230,220,255,0.7); margin-top: 8px; font-size: 0.95rem; }
+
+        /* ===== API DOCS ===== */
+        .endpoint {
+            background: rgba(0,0,0,0.25);
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .endpoint:hover { border-color: rgba(255,255,255,0.15); }
+        .endpoint .method {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 12px;
+        }
+        .method.get { background: rgba(33,150,243,0.3); color: #64b5f6; border: 1px solid rgba(33,150,243,0.2); }
+        .method.post { background: rgba(76,175,80,0.3); color: #81c784; border: 1px solid rgba(76,175,80,0.2); }
+        .method.delete { background: rgba(244,67,54,0.3); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.2); }
+        .endpoint .path {
+            font-family: monospace;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .endpoint .desc { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 8px; }
+        .endpoint .example {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #a5d6a7;
+            word-break: break-all;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .endpoint .params {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .endpoint .params .param {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .endpoint .params .param .key { color: #ffb3ba; font-weight: 600; }
+        .endpoint .params .param .required { color: #ff6b6b; margin-left: 4px; }
+
+        .footer {
+            text-align: center;
+            padding: 25px 20px 10px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 30px;
+        }
+        .footer .heart { color: #ff6b6b; animation: heartbeat 1.5s ease infinite; display: inline-block; }
+        @keyframes heartbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        /* responsive */
+        @media (max-width: 760px) {
+            .glass-card { padding: 24px; }
+            h1 { font-size: 28px; }
+            .logo-icon { font-size: 38px; }
+            nav h6 { display: none; }
+            .sidebar { width: 300px; left: -320px; }
+            .main-wrapper.shifted { margin-left: 0; }
+            #theme-button { width: 36px; height: 36px; font-size: 1.1rem; }
+            .endpoint { padding: 16px; }
+            .endpoint .path { font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            .glass-card { padding: 18px; }
+            h1 { font-size: 22px; }
+            .logo-icon { font-size: 30px; }
+            .endpoint .example { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- GREETING MODAL -->
+    <div class="greeting-modal" id="greetingModal">
+        <div class="greeting-card">
+            <div class="greeting-icon"><i class="fas fa-code"></i></div>
+            <h2 class="greeting-title">📖 API Documentation</h2>
+            <p class="greeting-subtitle">Simple and powerful endpoints for automated sharing.</p>
+            <div class="greeting-time"><i class="fas fa-clock"></i> <span id="greetingTimeDisplay">Loading...</span></div>
+            <button class="greeting-button" onclick="closeGreetingModal()"><i class="fas fa-eye"></i> Explore API</button>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="navbar-left">
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()"><div></div><div></div><div></div></div>
+            <img src="https://i.imgur.com/vqadMbv.png" alt="logo">
+            <h6>ShareBoost</h6>
+        </div>
+        <i class="fas fa-moon" id="theme-button"></i>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header"><h2>Menu</h2><div class="subtitle">ShareBoost Navigation</div></div>
+        <div class="sidebar-menu">
+            <a href="/dashboard.html" class="menu-item"><i class="fas fa-home"></i> HOME</a>
+            <a href="/logs.html" class="menu-item"><i class="fas fa-scroll"></i> LOGS</a>
+            <a href="/api-docs.html" class="menu-item active"><i class="fas fa-code"></i> API DOCS</a>
+            <a href="/tutorial.html" class="menu-item"><i class="fas fa-book-open"></i> TUTORIAL</a>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="sidebar-menu">
+            <a href="/profile" class="menu-item"><i class="fas fa-user"></i> PROFILE</a>
+            <a href="/settings" class="menu-item"><i class="fas fa-cog"></i> SETTINGS</a>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <!-- MAIN -->
+    <div class="main-wrapper" id="mainWrapper">
+        <div class="container">
+            <div class="glass-card fade-in">
+                <div class="logo-container">
+                    <i class="fas fa-code logo-icon"></i>
+                    <h1>API Documentation</h1>
+                </div>
+                <p class="tagline">Everything you need to integrate with ShareBoost</p>
+            </div>
+
+            <!-- Base URL -->
+            <div class="glass-card fade-in">
+                <h2 style="color: white; font-size: 1.2rem; margin-bottom: 10px;"><i class="fas fa-link" style="color: #4caf50;"></i> Base URL</h2>
+                <div style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; font-family: monospace; color: #81c784; word-break: break-all;">
+                    http://localhost:5000/api
+                </div>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 6px;">All endpoints are relative to this base URL.</p>
+            </div>
+
+            <!-- Simplified GET Share -->
+            <div class="glass-card fade-in">
+                <h2 style="color: white; font-size: 1.4rem; margin-bottom: 16px;"><i class="fas fa-bolt" style="color: #ffb74d;"></i> Simplified Share</h2>
+                <div class="endpoint">
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="path">/share</span>
+                    </div>
+                    <div class="desc">Start a sharing session with a single GET request. Cookies must be passed in the <code>Cookie</code> or <code>x-cookie</code> header.</div>
+                    <div class="params">
+                        <span class="param"><span class="key">link</span> <span class="required">*required</span> — Facebook post URL</span>
+                        <span class="param"><span class="key">amount</span> <span class="required">*required</span> — Number of shares (1-10000)</span>
+                        <span class="param"><span class="key">delay</span> — Delay between shares (seconds, default: 2)</span>
+                    </div>
+                    <div class="example">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i>
+                        GET /api/share?link=https://www.facebook.com/...&amp;amount=10&delay=2<br>
+                        <span style="color: #64b5f6;">Header:</span> Cookie: sb=xxx; datr=xxx; ...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Endpoints -->
+            <div class="glass-card fade-in">
+                <h2 style="color: white; font-size: 1.4rem; margin-bottom: 16px;"><i class="fas fa-list" style="color: #4caf50;"></i> Other Endpoints</h2>
+
+                <div class="endpoint">
+                    <div><span class="method post">POST</span> <span class="path">/submit</span></div>
+                    <div class="desc">Start a sharing session (legacy POST method).</div>
+                    <div class="params">
+                        <span class="param"><span class="key">cookie</span> <span class="required">*required</span> — JSON or cookie string</span>
+                        <span class="param"><span class="key">url</span> <span class="required">*required</span> — Post URL</span>
+                        <span class="param"><span class="key">amount</span> <span class="required">*required</span> — Shares (1-10000)</span>
+                    </div>
+                    <div class="example"><i class="fas fa-code" style="color: #4caf50; margin-right: 8px;"></i> POST /api/submit { "cookie": "...", "url": "...", "amount": 10 }</div>
+                </div>
+
+                <div class="endpoint">
+                    <div><span class="method get">GET</span> <span class="path">/sessions/summary</span></div>
+                    <div class="desc">Get summary of all active and completed sessions.</div>
+                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/sessions/summary</div>
+                </div>
+
+                <div class="endpoint">
+                    <div><span class="method get">GET</span> <span class="path">/session/:sessionId/logs</span></div>
+                    <div class="desc">Retrieve logs for a specific session.</div>
+                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/session/abc123/logs</div>
+                </div>
+
+                <div class="endpoint">
+                    <div><span class="method delete">DELETE</span> <span class="path">/session/:sessionId</span></div>
+                    <div class="desc">Stop a running session.</div>
+                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> DELETE /api/session/abc123</div>
+                </div>
+
+                <div class="endpoint">
+                    <div><span class="method get">GET</span> <span class="path">/tiktok/random</span></div>
+                    <div class="desc">Get a random TikTok video URL.</div>
+                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/tiktok/random</div>
+                </div>
+
+                <div class="endpoint">
+                    <div><span class="method get">GET</span> <span class="path">/health</span></div>
+                    <div class="desc">Check server health and active sessions.</div>
+                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/health</div>
+                </div>
+            </div>
+
+            <!-- Authentication -->
+            <div class="glass-card fade-in">
+                <h2 style="color: white; font-size: 1.2rem; margin-bottom: 10px;"><i class="fas fa-shield-alt" style="color: #ffb74d;"></i> Authentication</h2>
+                <p style="color: rgba(255,255,255,0.6); line-height: 1.6;">
+                    All endpoints require a valid Facebook cookie for authentication. You can obtain your cookie using the 
+                    <a href="/tutorial.html" style="color: #4caf50; text-decoration: none;">tutorial</a>.
+                    For the <strong>GET /share</strong> endpoint, pass the cookie in the <code>Cookie</code> header or <code>x-cookie</code> header.
+                    For POST endpoints, include the cookie in the request body.
+                </p>
+            </div>
+
+            <div class="footer">
+                <i class="fas fa-copyright"></i> 2026 All Rights Reserved.
+                <i class="fas fa-heart heart"></i> Made with <span style="color: #ff6b6b;">❤</span> by ShareBoost Team
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+            document.getElementById('hamburger').classList.toggle('active');
+            if (window.innerWidth > 768) document.getElementById('mainWrapper').classList.toggle('shifted');
+        }
+        function closeMenu() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('hamburger').classList.remove('active');
+            document.getElementById('mainWrapper').classList.remove('shifted');
+        }
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburger');
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) closeMenu();
+            }
+        });
+
+        // Theme
+        const themeBtn = document.getElementById('theme-button');
+        const saved = localStorage.getItem('shareboost-theme');
+        if (saved === 'dark') { document.body.classList.add('dark-mode'); themeBtn.className = 'fas fa-sun'; }
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeBtn.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('shareboost-theme', isDark ? 'dark' : 'light');
+        });
+
+        // Greeting Modal
+        function showGreetingModal() {
+            const modal = document.getElementById('greetingModal');
+            const now = new Date();
+            document.getElementById('greetingTimeDisplay').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            modal.classList.add('show');
+            setTimeout(() => closeGreetingModal(), 4000);
+        }
+        function closeGreetingModal() { document.getElementById('greetingModal').classList.remove('show'); }
+
+        // Fade-in
+        function handleScroll() {
+            document.querySelectorAll('.fade-in').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 80) el.classList.add('visible');
+            });
+        }
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('load', () => {
+            setTimeout(showGreetingModal, 500);
+            handleScroll();
+        });
+    </script>
+</body>
+</html>
