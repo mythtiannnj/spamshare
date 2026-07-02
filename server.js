@@ -1,325 +1,837 @@
 const express = require('express');
 const axios = require('axios');
-const cheerio = require('cheerio');
-const cors = require('cors');
 const path = require('path');
+const bodyParser = require('body-parser');
 const fs = require('fs').promises;
 const crypto = require('crypto');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Enhanced data structures
+const total = new Map();
+const activeTimers = new Map();
+const rateLimiter = new Map();
+const sessionLogs = new Map();
+
+// TikTok video cache
+let tiktokVideoCache = null;
+let lastTikTokFetch = 0;
+const TIKTOK_CACHE_DURATION = 30000; // 30 seconds cache
 
 // Configuration
 const CONFIG = {
-    output_dir: path.join(__dirname, 'output'),
-    facebook_reg_url: 'https://m.facebook.com/reg/',
-    facebook_submit_url: 'https://m.facebook.com/reg/submit/',
+    RATE_LIMIT_WINDOW: 60000, // 1 minute
+    MAX_REQUESTS_PER_WINDOW: 30,
+    REQUEST_TIMEOUT: 30000,
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 2000,
+    LOG_RETENTION_DAYS: 7
 };
 
-// Ensure output directory exists
-fs.mkdir(CONFIG.output_dir, { recursive: true });
+// Enhanced logging
+class Logger {
+    static async log(sessionId, action, data) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            sessionId,
+            action,
+            data
+        };
 
-// Name databases
-const firstNames = [
-    "Maria", "Ana", "Joy", "Grace", "Angel", "Angela", "Christine", "Kristine",
-    "Michelle", "Shiela", "Sheila", "Maricel", "Marites", "Maribel", "Marjorie",
-    "Jennifer", "Jenny", "Jessa", "Jessica", "Janine", "Katherine", "Catherine",
-    "Kathleen", "Karen", "Karla", "Camille", "Bianca", "Patricia", "Patty",
-    "Tricia", "Aileen", "Eileen", "Irene", "Iris", "Hazel", "Cherry", "Lovely",
-    "Honey", "Princess", "Angelica", "Bernadette", "Rowena", "Rosalie", "Roselyn",
-    "Rosalinda", "Lourdes", "Teresa", "Therese", "Carmela", "Carmen", "Liza",
-    "Elizabeth", "Beth", "Isabel", "Isabela", "Bella", "Andrea", "Andi",
-    "Alexandra", "Alexa", "Nina", "Mina", "Rina", "Jocelyn", "Jocelle", "Jhoanna",
-    "Joan", "Joanne", "Joanna", "Johanna", "May", "Mae", "Mylene", "Myra", "Myrna",
-    "Melanie", "Melisa", "Melissa", "Marissa", "Mariz", "Pauline", "Paula",
-    "Paulina", "Regina", "Rhea", "Rochelle", "Sharon", "Samantha", "Sandra",
-    "Sarah", "Sophia", "Sofia", "Stephanie", "Tiffany", "Vanessa", "Veronica",
-    "Vina", "Yvonne", "Leah", "Lia", "Louise", "Luisa", "Lorraine", "Lorna",
-    "Lani", "Mika", "Mikaela", "Janelle", "Janella", "Janice", "Joyce", "Judy",
-    "Judith", "Julie", "Juliana", "Juliet", "Julienne", "Faith", "Hope",
-    "Charity", "Heaven", "Blessy", "Precious", "Lovelyn", "Shaira", "Aira",
-    "Kyra", "Rachelle", "Rachel", "Reina", "Selena", "Selina", "Trisha", "Trina",
-    "Wendy", "Zenaida", "Juan", "Jose", "Pedro", "Paolo", "Paul", "Mark", "John",
-    "Johnny", "Jonathan", "Nathan", "Michael", "Miguel", "Daniel", "David",
-    "Andrew", "Andre", "Anthony", "Antonio", "Albert", "Alfred", "Brian", "Bryan",
-    "Benjamin", "Carlo", "Carlos", "Christian", "Christopher", "Chris", "Cedric",
-    "Cesar", "Dennis", "Diego", "Dominic", "Edward", "Edgar", "Emmanuel", "Eric",
-    "Erwin", "Francis", "Frank", "Gabriel", "Gilbert", "Henry", "Ian", "Ivan",
-    "James", "Jasper", "Jerome", "Joel", "Joshua", "Kenneth", "Kevin", "Kyle",
-    "Lawrence", "Leo", "Leonard", "Lester", "Louis", "Lucas", "Marco", "Martin",
-    "Matthew", "Melvin", "Nathaniel", "Noel", "Oliver", "Patrick", "Paolo",
-    "Raymond", "Richard", "Robert", "Ronald", "Ryan", "Samuel", "Sebastian",
-    "Steven", "Stephen", "Thomas", "Timothy", "Victor", "Vincent", "Wilfred",
-    "William", "Xavier", "Zachary"
-];
+        if (!sessionLogs.has(sessionId)) {
+            sessionLogs.set(sessionId, []);
+        }
+        sessionLogs.get(sessionId).push(logEntry);
 
-const surnames = [
-    "Santos", "Reyes", "Cruz", "Bautista", "Garcia", "Mendoza", "Flores",
-    "Gonzales", "Ramos", "Aquino", "DelaCruz", "DelosSantos", "Villanueva",
-    "Fernandez", "Castillo", "Torres", "Dominguez", "Navarro", "Salazar",
-    "DeGuzman", "Perez", "Rivera", "Lopez", "Martinez", "Hernandez", "Alvarez",
-    "Morales", "Rojas", "Santiago", "Padilla", "Rosales", "Valdez", "Estrada",
-    "Aguilar", "Manalo", "Francisco", "Romero", "Velasco", "Soriano", "Pascual",
-    "Pineda", "Ferrer", "Cuevas", "Suarez", "Montes", "Calderon", "DelosReyes",
-    "Lim", "Tan", "Chua"
-];
+        // Keep last 500 logs per session
+        if (sessionLogs.get(sessionId).length > 500) {
+            sessionLogs.set(sessionId, sessionLogs.get(sessionId).slice(-500));
+        }
 
-function generateUserAgent() {
-    const androidVersions = ['10', '11', '12', '13', '14'];
-    const chromeVersions = ['120', '121', '122', '123', '124'];
-    const devices = ['SM-G998B', 'Pixel 7 Pro', 'OnePlus 11', 'Xiaomi 13 Pro', 'OPPO Find X6'];
-    
-    const androidVer = androidVersions[Math.floor(Math.random() * androidVersions.length)];
-    const chromeVer = chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
-    const device = devices[Math.floor(Math.random() * devices.length)];
-    const buildVer = Math.floor(Math.random() * 9000) + 1000;
-    const patchVer = Math.floor(Math.random() * 150) + 70;
-    
-    return `Mozilla/5.0 (Linux; Android ${androidVer}; ${device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVer}.0.${buildVer}.${patchVer} Mobile Safari/537.36`;
-}
-
-function generatePassword() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-        password += chars[Math.floor(Math.random() * chars.length)];
+        // Save to file every 50 logs
+        if (sessionLogs.get(sessionId).length % 50 === 0) {
+            await this.saveToFile(sessionId);
+        }
     }
-    return password;
-}
 
-function generateBDPhone() {
-    const prefixes = ['17', '18', '19', '16', '15', '13', '14'];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    let number = '';
-    for (let i = 0; i < 8; i++) {
-        number += Math.floor(Math.random() * 10);
+    static async saveToFile(sessionId) {
+        const logs = sessionLogs.get(sessionId);
+        if (!logs) return;
+
+        try {
+            await fs.mkdir('logs', { recursive: true });
+            const filename = `logs/session_${sessionId}_${Date.now()}.json`;
+            await fs.writeFile(filename, JSON.stringify(logs.slice(-200), null, 2));
+        } catch (error) {
+            console.error('Failed to save logs:', error);
+        }
     }
-    return `${prefix}${number}`;
-}
 
-function generateMixedPhone() {
-    const prefixes = {
-        '1': ['201', '202', '303', '312', '415', '646', '718'],
-        '44': ['7400', '7500', '7600', '7700', '7800', '7900'],
-        '63': ['917', '918', '919', '920', '921', '922'],
-        '62': ['813', '815', '816', '817', '818', '819']
-    };
-    const codes = Object.keys(prefixes);
-    const code = codes[Math.floor(Math.random() * codes.length)];
-    const prefixList = prefixes[code];
-    const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
-    let number = '';
-    const length = code === '44' ? 6 : 7;
-    for (let i = 0; i < length; i++) {
-        number += Math.floor(Math.random() * 10);
+    static getLogs(sessionId) {
+        return sessionLogs.get(sessionId) || [];
     }
-    return `${code}${prefix}${number}`;
 }
 
-function generateTempEmail() {
-    const domains = ['guerrillamail.com', '10minutemail.com', 'tempmail.com', 'mailinator.com'];
-    const username = crypto.randomBytes(6).toString('hex');
-    return `${username}@${domains[Math.floor(Math.random() * domains.length)]}`;
+// Rate limiter
+class RateLimiter {
+    static checkLimit(sessionId) {
+        const now = Date.now();
+        const sessionLimit = rateLimiter.get(sessionId);
+
+        if (!sessionLimit) {
+            rateLimiter.set(sessionId, {
+                count: 1,
+                resetTime: now + CONFIG.RATE_LIMIT_WINDOW
+            });
+            return true;
+        }
+
+        if (now > sessionLimit.resetTime) {
+            rateLimiter.set(sessionId, {
+                count: 1,
+                resetTime: now + CONFIG.RATE_LIMIT_WINDOW
+            });
+            return true;
+        }
+
+        if (sessionLimit.count >= CONFIG.MAX_REQUESTS_PER_WINDOW) {
+            return false;
+        }
+
+        sessionLimit.count++;
+        return true;
+    }
 }
 
-function getRandomName() {
-    return {
-        first: firstNames[Math.floor(Math.random() * firstNames.length)],
-        last: surnames[Math.floor(Math.random() * surnames.length)]
-    };
-}
-
-function extractFormData(html) {
-    const $ = cheerio.load(html);
-    const formData = {};
-    $('input').each((i, elem) => {
-        const name = $(elem).attr('name');
-        const value = $(elem).attr('value') || '';
-        if (name) formData[name] = value;
-    });
-    return formData;
-}
-
-async function saveAccount(account) {
-    const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-    const line = `${account.uid}|${account.email}|${account.password}|${account.cookies}|${new Date().toISOString()}\n`;
-    await fs.appendFile(filePath, line);
-}
-
-async function createFacebookAccount(emailType, customPassword = null) {
-    const session = axios.create({
-        timeout: 30000,
-        maxRedirects: 5,
-        validateStatus: status => status < 500
-    });
-    
+// TikTok API integration
+async function fetchRandomTikTok() {
     try {
-        const userAgent = generateUserAgent();
-        const headers = {
-            'User-Agent': userAgent,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1'
-        };
-        
-        const regResponse = await session.get(CONFIG.facebook_reg_url, { headers });
-        if (regResponse.status !== 200) {
-            throw new Error(`Failed to load registration page: ${regResponse.status}`);
-        }
-        
-        const formData = extractFormData(regResponse.data);
-        const { first, last } = getRandomName();
-        const password = customPassword || generatePassword();
-        
-        let contact;
-        if (emailType === 'temp') {
-            contact = generateTempEmail();
-        } else if (emailType === 'mixed') {
-            contact = generateMixedPhone();
-        } else {
-            contact = generateBDPhone();
-        }
-        
-        const birthdayDay = Math.floor(Math.random() * 28) + 1;
-        const birthdayMonth = Math.floor(Math.random() * 12) + 1;
-        const birthdayYear = Math.floor(Math.random() * 15) + 1985;
-        
-        const payload = {
-            reg_instance: formData.reg_instance || '',
-            email: emailType === 'temp' ? contact : '',
-            phone_number: emailType !== 'temp' ? contact : '',
-            firstname: first,
-            lastname: last,
-            birthday_day: birthdayDay,
-            birthday_month: birthdayMonth,
-            birthday_year: birthdayYear,
-            sex: '1',
-            password: password,
-            submit: 'Sign Up',
-            lsd: formData.lsd || '',
-            jazoest: formData.jazoest || ''
-        };
-        
-        Object.keys(payload).forEach(key => {
-            if (payload[key] === '') delete payload[key];
+        const response = await axios.get('https://betadash-shoti-yazky.vercel.app/shotizxx?apikey=shipazu', {
+            timeout: 10000
         });
-        
-        const submitHeaders = {
-            ...headers,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': 'https://m.facebook.com',
-            'Referer': CONFIG.facebook_reg_url
+
+        if (response.data && response.data.shotiurl) {
+            return {
+                success: true,
+                video: {
+                    url: response.data.shotiurl
+                }
+            };
+        }
+        throw new Error('Invalid response from TikTok API');
+    } catch (error) {
+        console.error('TikTok API error:', error.message);
+        return {
+            success: false,
+            error: error.message
         };
-        
-        await session.post(CONFIG.facebook_submit_url, new URLSearchParams(payload).toString(), { headers: submitHeaders });
-        
-        const cookies = session.defaults.headers.common['Cookie'] || '';
-        const cookieJar = {};
-        
-        if (cookies) {
-            cookies.split(';').forEach(cookie => {
-                const [key, value] = cookie.trim().split('=');
-                if (key && value) cookieJar[key] = value;
+    }
+}
+
+// ============== API ENDPOINTS ==============
+
+// Get all sessions with stats (for logs page)
+app.get('/api/sessions/summary', (req, res) => {
+    try {
+        const sessions = Array.from(total.values()).map(session => ({
+            sessionId: session.sessionId,
+            postId: session.postId,
+            status: session.status,
+            sharedCount: session.count,
+            targetAmount: session.target,
+            url: session.url,
+            startTime: session.startTime
+        }));
+
+        let totalShares = 0;
+        let activeSessions = 0;
+        let completedSessions = 0;
+
+        sessions.forEach(session => {
+            totalShares += session.sharedCount || 0;
+            if (session.status === 'running') activeSessions++;
+            if (session.status === 'completed') completedSessions++;
+        });
+
+        res.json({
+            success: true,
+            sessions,
+            totals: {
+                totalShares,
+                activeSessions,
+                completedSessions,
+                totalSessions: sessions.length
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching sessions summary:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch sessions summary'
+        });
+    }
+});
+
+// Get detailed sessions (for backward compatibility)
+app.get('/api/total', (req, res) => {
+    try {
+        const data = Array.from(total.values()).map(session => ({
+            sessionId: session.sessionId,
+            url: session.url,
+            sharedCount: session.count,
+            targetAmount: session.target,
+            postId: session.postId,
+            status: session.status,
+            progress: ((session.count / session.target) * 100).toFixed(2),
+            startTime: session.startTime,
+            estimatedCompletion: session.estimatedCompletion,
+            error: session.error || null
+        }));
+
+        res.json({
+            success: true,
+            activeSessions: total.size,
+            sessions: data,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error in /api/total:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch session data'
+        });
+    }
+});
+
+// TikTok endpoint - returns only video URL
+app.get('/api/tiktok/random', async (req, res) => {
+    try {
+        const now = Date.now();
+        if (tiktokVideoCache && (now - lastTikTokFetch) < TIKTOK_CACHE_DURATION) {
+            return res.json(tiktokVideoCache);
+        }
+
+        const result = await fetchRandomTikTok();
+        if (result.success) {
+            tiktokVideoCache = result;
+            lastTikTokFetch = now;
+            res.json(result);
+        } else {
+            // Fallback video
+            res.json({
+                success: true,
+                video: {
+                    url: "https://v16m.tiktokcdn-us.com/5df5e84d2402e0ba15dfa7680934a925/6a1af973/video/tos/alisg/tos-alisg-pve-0037c001/ogfjIIpt4fwX0siphQCyEjV6APFvDOAeUbDgbE/?a=1233&bti=OUBzOTg7QGo6OjZAL3AjLTAzYCMxNDNg&&bt=1105&ft=kLx3-yt4ZZo0PDFqad3aQ9ATU~j6JE.C~&mime_type=video_mp4&rc=ODM3OGc0ZzM6ODM7ZmllZkBpMzRvcnk5cnZ4djMzODczNEBfYzYwX15eNmExMGEwLzJiYSNwa2ZqMmQ0aGhgLS1kMS1zcw%3D%3D&vvpl=1&l=2026053008512459F084F3864AA74F0D80&btag=e000f0000"
+                }
             });
         }
-        
-        const uid = cookieJar.c_user;
-        
-        if (uid) {
-            const cookieString = Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join('; ');
-            const result = {
-                success: true,
-                uid: uid,
-                password: password,
-                email: contact,
-                name: `${first} ${last}`,
-                gender: 'Female',
-                dob: `${birthdayDay}/${birthdayMonth}/${birthdayYear}`,
-                cookies: cookieString
-            };
-            await saveAccount(result);
-            return result;
-        }
-        
-        return { success: false, error: 'Registration failed - no UID received' };
     } catch (error) {
-        return { success: false, error: error.message };
+        console.error('Error in /api/tiktok/random:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch TikTok video'
+        });
+    }
+});
+
+// Get session logs
+app.get('/api/session/:sessionId/logs', (req, res) => {
+    try {
+        const { sessionId } = req.params;
+        const logs = Logger.getLogs(sessionId);
+
+        const formattedLogs = logs.map(log => ({
+            timestamp: log.timestamp,
+            action: log.action,
+            data: log.data,
+            sessionId: log.sessionId
+        }));
+
+        res.json({
+            success: true,
+            sessionId,
+            logs: formattedLogs,
+            totalLogs: formattedLogs.length
+        });
+    } catch (error) {
+        console.error('Error fetching logs:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch session logs'
+        });
+    }
+});
+
+// Stop session
+app.delete('/api/session/:sessionId', async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+
+        if (!total.has(sessionId)) {
+            return res.status(404).json({
+                success: false,
+                error: 'Session not found'
+            });
+        }
+
+        await stopSharing(sessionId);
+        total.delete(sessionId);
+
+        res.json({
+            success: true,
+            message: 'Session stopped successfully'
+        });
+    } catch (error) {
+        console.error('Error stopping session:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to stop session'
+        });
+    }
+});
+
+// Submit new share session (POST)
+app.post('/api/submit', async (req, res) => {
+    try {
+        const { cookie, url, amount, interval } = req.body;
+
+        if (!cookie || !url || !amount) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: cookie, url, amount'
+            });
+        }
+
+        if (amount < 1 || amount > 10000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Amount must be between 1 and 10000'
+            });
+        }
+
+        // Force interval to always be 2 seconds
+        const forcedInterval = 2;
+
+        if (interval && interval !== 2) {
+            console.log(`Interval changed from ${interval} to 2 seconds (forced)`);
+        }
+
+        const cookies = await convertCookie(cookie);
+        if (!cookies) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid cookies format'
+            });
+        }
+
+        const sessionId = crypto.randomBytes(16).toString('hex');
+        const result = await share(cookies, url, amount, forcedInterval, sessionId);
+
+        res.json({
+            success: true,
+            sessionId: result.sessionId,
+            message: 'Sharing started successfully (2 second delay enforced)',
+            estimatedCompletion: result.estimatedCompletion
+        });
+    } catch (err) {
+        console.error('Error in /api/submit:', err);
+        return res.status(500).json({
+            success: false,
+            error: err.message || 'Internal server error'
+        });
+    }
+});
+
+// ============== SIMPLIFIED SHARE API (GET) ==============
+app.get('/api/share', async (req, res) => {
+    try {
+        const { link, amount, delay } = req.query;
+
+        // Validate required parameters
+        if (!link || !amount) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required parameters: link and amount are required',
+                usage: '/api/share?link=YOUR_URL&amount=10&delay=2'
+            });
+        }
+
+        // Validate amount
+        const shareAmount = parseInt(amount);
+        if (isNaN(shareAmount) || shareAmount < 1 || shareAmount > 10000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Amount must be between 1 and 10000'
+            });
+        }
+
+        // Parse delay (default 2)
+        let shareDelay = 2;
+        if (delay) {
+            const parsedDelay = parseInt(delay);
+            if (!isNaN(parsedDelay) && parsedDelay > 0) {
+                shareDelay = parsedDelay;
+            }
+        }
+
+        // Check if cookies are provided (via header)
+        const cookieHeader = req.headers.cookie || req.headers['x-cookie'];
+        if (!cookieHeader) {
+            return res.status(400).json({
+                success: false,
+                error: 'Cookies required. Please provide cookies via Cookie header or x-cookie header'
+            });
+        }
+
+        // Generate session ID
+        const sessionId = crypto.randomBytes(16).toString('hex');
+
+        // Process the share request
+        const cookies = await convertCookie(cookieHeader);
+        if (!cookies) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid cookies format'
+            });
+        }
+
+        // Start sharing process
+        const result = await share(cookies, link, shareAmount, shareDelay, sessionId);
+
+        res.json({
+            success: true,
+            sessionId: result.sessionId,
+            link: link,
+            amount: shareAmount,
+            delay: shareDelay,
+            estimatedCompletion: result.estimatedCompletion,
+            message: `Sharing started successfully with ${shareDelay} second delay`
+        });
+
+    } catch (error) {
+        console.error('Error in /api/share:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Internal server error'
+        });
+    }
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        activeSessions: total.size,
+        maxConcurrent: 'Unlimited',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        endpoints: {
+            share: '/api/share?link=URL&amount=N&delay=2',
+            submit: '/api/submit (POST)',
+            sessions: '/api/sessions/summary',
+            logs: '/api/session/:sessionId/logs',
+            tiktok: '/api/tiktok/random'
+        }
+    });
+});
+
+// ============== CORE FUNCTIONS ==============
+
+async function share(cookies, url, amount, interval, sessionId) {
+    const id = await getPostID(url);
+    if (!id) {
+        throw new Error("Unable to get post ID: Invalid URL, private post, or friends-only visibility");
+    }
+
+    const accessToken = await getAccessToken(cookies);
+    if (!accessToken) {
+        throw new Error("Unable to get access token: Invalid cookies or session expired");
+    }
+
+    const startTime = Date.now();
+    const estimatedCompletion = new Date(startTime + (amount * interval * 1000));
+
+    const sessionData = {
+        sessionId,
+        url,
+        postId: id,
+        count: 0,
+        target: amount,
+        status: 'running',
+        startTime: new Date().toISOString(),
+        estimatedCompletion: estimatedCompletion.toISOString(),
+        error: null,
+        cookies,
+        accessToken,
+        interval,
+        sharedCount: 0
+    };
+
+    total.set(sessionId, sessionData);
+    await Logger.log(sessionId, 'session_started', { url, amount, interval, postId: id });
+
+    let sharedCount = 0;
+    let consecutiveErrors = 0;
+
+    async function sharePost() {
+        if (!total.has(sessionId)) {
+            return;
+        }
+
+        if (!RateLimiter.checkLimit(sessionId)) {
+            await Logger.log(sessionId, 'rate_limited', { timestamp: new Date().toISOString() });
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `https://graph.facebook.com/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${accessToken}`,
+                {},
+                {
+                    headers: {
+                        'accept': '*/*',
+                        'accept-encoding': 'gzip, deflate',
+                        'connection': 'keep-alive',
+                        'content-length': '0',
+                        'cookie': cookies,
+                        'host': 'graph.facebook.com',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    },
+                    timeout: CONFIG.REQUEST_TIMEOUT
+                }
+            );
+
+            if (response.status === 200) {
+                sharedCount++;
+                consecutiveErrors = 0;
+
+                const session = total.get(sessionId);
+                if (session) {
+                    session.count = sharedCount;
+                    session.sharedCount = sharedCount;
+                    session.status = sharedCount >= amount ? 'completed' : 'running';
+                    total.set(sessionId, session);
+                }
+
+                await Logger.log(sessionId, 'share_success', {
+                    count: sharedCount,
+                    total: amount,
+                    postId: id,
+                    timestamp: new Date().toISOString()
+                });
+
+                if (sharedCount >= amount) {
+                    await stopSharing(sessionId);
+                    await Logger.log(sessionId, 'session_completed', {
+                        totalShared: sharedCount,
+                        completedAt: new Date().toISOString()
+                    });
+                }
+            }
+        } catch (error) {
+            consecutiveErrors++;
+            await Logger.log(sessionId, 'share_error', {
+                error: error.message,
+                consecutiveErrors,
+                postId: id,
+                timestamp: new Date().toISOString()
+            });
+
+            if (consecutiveErrors >= 5) {
+                await Logger.log(sessionId, 'session_stopped_due_to_errors', {
+                    reason: 'Too many consecutive errors',
+                    errorCount: consecutiveErrors
+                });
+                await stopSharing(sessionId);
+                if (total.has(sessionId)) {
+                    const session = total.get(sessionId);
+                    session.status = 'failed';
+                    session.error = `Stopped after ${consecutiveErrors} consecutive errors`;
+                    total.set(sessionId, session);
+                }
+            }
+        }
+    }
+
+    const timer = setInterval(sharePost, interval * 1000);
+    activeTimers.set(sessionId, timer);
+
+    const timeoutId = setTimeout(() => {
+        if (total.has(sessionId) && total.get(sessionId).count < amount) {
+            stopSharing(sessionId);
+            const session = total.get(sessionId);
+            if (session) {
+                session.status = 'timeout';
+                session.error = 'Session timed out before completion';
+                total.set(sessionId, session);
+            }
+        }
+    }, amount * interval * 1000 + 60000);
+
+    activeTimers.set(`${sessionId}_timeout`, timeoutId);
+
+    return {
+        sessionId,
+        estimatedCompletion: estimatedCompletion.toISOString()
+    };
+}
+
+async function stopSharing(sessionId) {
+    const timer = activeTimers.get(sessionId);
+    if (timer) {
+        clearInterval(timer);
+        activeTimers.delete(sessionId);
+    }
+
+    const timeoutId = activeTimers.get(`${sessionId}_timeout`);
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+        activeTimers.delete(`${sessionId}_timeout`);
+    }
+
+    await Logger.log(sessionId, 'session_stopped', {
+        timestamp: new Date().toISOString()
+    });
+}
+
+async function getPostID(url, retryCount = 0) {
+    try {
+        const response = await axios.post('https://id.traodoisub.com/api.php', 
+            `link=${encodeURIComponent(url)}`,
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                timeout: CONFIG.REQUEST_TIMEOUT
+            }
+        );
+
+        if (response.data && response.data.id) {
+            return response.data.id;
+        }
+        throw new Error('No ID returned from API');
+    } catch (error) {
+        if (retryCount < CONFIG.RETRY_ATTEMPTS) {
+            await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
+            return getPostID(url, retryCount + 1);
+        }
+        return null;
     }
 }
 
-// API Routes
-app.post('/api/create-accounts', async (req, res) => {
-    const { emailType, passwordType, customPassword, count } = req.body;
-    
-    if (!count || count < 1 || count > 20) {
-        return res.status(400).json({ error: 'Count must be between 1 and 20' });
-    }
-    
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    
-    for (let i = 0; i < count; i++) {
-        try {
-            const finalPassword = passwordType === 'custom' ? customPassword : null;
-            const result = await createFacebookAccount(emailType, finalPassword);
-            
-            if (result.success) {
-                res.write(`data: ${JSON.stringify({ type: 'success', data: result, current: i + 1, total: count })}\n\n`);
-            } else {
-                res.write(`data: ${JSON.stringify({ type: 'error', data: result, current: i + 1, total: count })}\n\n`);
-            }
-        } catch (error) {
-            res.write(`data: ${JSON.stringify({ type: 'error', data: { error: error.message }, current: i + 1, total: count })}\n\n`);
+async function getAccessToken(cookie, retryCount = 0) {
+    try {
+        const headers = {
+            'authority': 'business.facebook.com',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'max-age=0',
+            'cookie': cookie,
+            'referer': 'https://www.facebook.com/',
+            'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'same-origin',
+            'upgrade-insecure-requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        };
+
+        const response = await axios.get('https://business.facebook.com/content_management', {
+            headers,
+            timeout: CONFIG.REQUEST_TIMEOUT
+        });
+
+        const tokenMatch = response.data.match(/"accessToken":"([^"]+)"/);
+        if (tokenMatch && tokenMatch[1]) {
+            return tokenMatch[1];
         }
-        await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-    
-    res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
-    res.end();
-});
 
-app.get('/api/accounts', async (req, res) => {
-    try {
-        const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-        const content = await fs.readFile(filePath, 'utf-8').catch(() => '');
-        const accounts = content.split('\n')
-            .filter(line => line.trim())
-            .map(line => {
-                const [uid, email, password, cookies, date] = line.split('|');
-                return { uid, email, password, date: date || new Date().toISOString() };
-            })
-            .reverse();
-        res.json(accounts);
+        throw new Error('Access token not found in response');
     } catch (error) {
-        res.json([]);
+        if (retryCount < CONFIG.RETRY_ATTEMPTS) {
+            await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
+            return getAccessToken(cookie, retryCount + 1);
+        }
+        return null;
     }
-});
+}
 
-app.delete('/api/accounts', async (req, res) => {
+async function convertCookie(cookie) {
     try {
-        const filePath = path.join(CONFIG.output_dir, 'created_accounts.txt');
-        await fs.writeFile(filePath, '');
-        res.json({ success: true });
+        let cookies;
+        if (typeof cookie === 'string') {
+            try {
+                cookies = JSON.parse(cookie);
+            } catch {
+                if (cookie.includes('=')) {
+                    return cookie;
+                }
+                throw new Error('Invalid cookie format');
+            }
+        } else if (Array.isArray(cookie)) {
+            cookies = cookie;
+        } else {
+            throw new Error('Cookie must be an array or JSON string');
+        }
+
+        const sbCookie = cookies.find(c => c.key === "sb");
+        if (!sbCookie) {
+            throw new Error("Cookie missing 'sb' field - invalid appstate");
+        }
+
+        const sbValue = sbCookie.value;
+        const cookieString = `sb=${sbValue}; ${cookies
+            .filter(c => c.key !== "sb")
+            .map(c => `${c.key}=${c.value}`)
+            .join('; ')}`;
+
+        return cookieString;
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Cookie conversion error:', error);
+        throw new Error(error.message || "Error processing cookie");
+    }
+}
+
+// Cleanup old sessions every hour
+setInterval(() => {
+    const now = Date.now();
+    for (const [sessionId, session] of total.entries()) {
+        const sessionTime = new Date(session.startTime).getTime();
+        if (session.status === 'completed' && (now - sessionTime) > 86400000) { // 24 hours
+            total.delete(sessionId);
+            sessionLogs.delete(sessionId);
+        }
+        if (session.status === 'failed' && (now - sessionTime) > 43200000) { // 12 hours
+            total.delete(sessionId);
+            sessionLogs.delete(sessionId);
+        }
+    }
+}, 3600000);
+
+// ============== HTML PAGE ROUTES ==============
+
+// Main pages
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/logs.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logs.html'));
+});
+
+app.get('/api-docs.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'api-docs.html'));
+});
+
+// Tutorial page
+app.get('/tutorial.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tutorial.html'));
+});
+
+// Default route - redirect to dashboard
+app.get('/', (req, res) => {
+    res.redirect('/dashboard.html');
+});
+
+// ============== 404 ERROR HANDLER ==============
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        return next();
+    }
+
+    const acceptHeader = req.headers.accept || '';
+    if (acceptHeader.includes('text/html')) {
+        res.status(404);
+        res.sendFile(path.join(__dirname, 'public', '404.html'), (err) => {
+            if (err) {
+                res.status(404).send(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>404 - Page Not Found</title></head>
+                    <body style="font-family: Arial; text-align: center; padding: 50px;">
+                        <h1>404 - Page Not Found</h1>
+                        <p>The page you are looking for does not exist.</p>
+                        <a href="/dashboard.html">Return to Dashboard</a>
+                    </body>
+                    </html>
+                `);
+            }
+        });
+    } else {
+        res.status(404).json({
+            success: false,
+            error: 'Endpoint not found',
+            path: req.path
+        });
     }
 });
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// ============== 500 ERROR HANDLER ==============
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    console.error('Error stack:', err.stack);
+
+    if (req.path.startsWith('/api/')) {
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: err.message || 'Something went wrong on the server'
+        });
+    }
+
+    res.status(500);
+    res.sendFile(path.join(__dirname, 'public', '500.html'), (sendErr) => {
+        if (sendErr) {
+            res.status(500).send(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>500 - Server Error</title></head>
+                <body style="font-family: Arial; text-align: center; padding: 50px;">
+                    <h1>500 - Internal Server Error</h1>
+                    <p>Something went wrong on our end. Please try again later.</p>
+                    <a href="/dashboard.html">Return to Dashboard</a>
+                </body>
+                </html>
+            `);
+        }
+    });
 });
 
+// ============== START SERVER ==============
+(async () => {
+    try {
+        await fs.mkdir('logs', { recursive: true });
+        console.log('📁 Logs directory ready');
+    } catch (error) {
+        console.error('Failed to create logs directory:', error);
+    }
+})();
+
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`\n╔════════════════════════════════════════════╗`);
-    console.log(`║   CYBER-X Facebook Account Creator       ║`);
-    console.log(`║   Server running on: http://localhost:${PORT} ║`);
-    console.log(`╚════════════════════════════════════════════╝\n`);
+    console.log(`
+╔══════════════════════════════════════════════════════════════╗
+║                    SHAREBOOST PRO SERVER                      ║
+╠══════════════════════════════════════════════════════════════╣
+║  🚀 Server running on port: ${PORT}                              ║
+║  🌐 Dashboard:      http://localhost:${PORT}/dashboard.html     ║
+║  📋 Live Logs:      http://localhost:${PORT}/logs.html          ║
+║  📖 API Docs:       http://localhost:${PORT}/api-docs.html      ║
+║  🎵 TikTok API:     http://localhost:${PORT}/api/tiktok/random  ║
+║  ♾️  Unlimited concurrent sessions enabled                      ║
+║  ⏱️  Fixed delay: 2 seconds enforced                            ║
+║  📊 Health check:   http://localhost:${PORT}/api/health         ║
+╠══════════════════════════════════════════════════════════════╣
+║  📄 Error Pages:                                               ║
+║  🔴 404 Not Found:     http://localhost:${PORT}/404.html        ║
+║  🟠 500 Server Error:   http://localhost:${PORT}/500.html        ║
+╚══════════════════════════════════════════════════════════════╝
+    `);
 });
+
+module.exports = app;
