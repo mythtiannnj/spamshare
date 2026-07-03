@@ -345,7 +345,7 @@ app.post('/api/submit', async (req, res) => {
     }
 });
 
-// ============== SIMPLIFIED SHARE API (GET) ==============
+// ============== SIMPLIFIED SHARE API (GET) - with cookie in header ==============
 app.get('/api/share', async (req, res) => {
     try {
         const { link, amount, delay } = req.query;
@@ -420,6 +420,73 @@ app.get('/api/share', async (req, res) => {
     }
 });
 
+// ============== SIMPLIFIED SHARE API (GET) - All-in-one with cookie in query ==============
+app.get('/ap/share', async (req, res) => {
+    try {
+        const { cookie, link, amount, delay } = req.query;
+
+        // Validate required parameters
+        if (!cookie || !link || !amount) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required parameters: cookie, link, and amount are required',
+                usage: '/ap/share?cookie=YOUR_COOKIE&link=POST_URL&amount=10&delay=2',
+                example: '/ap/share?cookie=sb%3Dxxx%3B%20datr%3Dxxx&link=https%3A%2F%2Fwww.facebook.com%2F...&amount=10'
+            });
+        }
+
+        // Validate amount
+        const shareAmount = parseInt(amount);
+        if (isNaN(shareAmount) || shareAmount < 1 || shareAmount > 10000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Amount must be between 1 and 10000'
+            });
+        }
+
+        // Parse delay (default 2 seconds)
+        let shareDelay = 2;
+        if (delay) {
+            const parsedDelay = parseInt(delay);
+            if (!isNaN(parsedDelay) && parsedDelay > 0) {
+                shareDelay = parsedDelay;
+            }
+        }
+
+        // Process the share request
+        const cookies = await convertCookie(cookie);
+        if (!cookies) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid cookies format'
+            });
+        }
+
+        // Generate session ID
+        const sessionId = crypto.randomBytes(16).toString('hex');
+
+        // Start sharing process
+        const result = await share(cookies, link, shareAmount, shareDelay, sessionId);
+
+        res.json({
+            success: true,
+            sessionId: result.sessionId,
+            link: link,
+            amount: shareAmount,
+            delay: shareDelay,
+            estimatedCompletion: result.estimatedCompletion,
+            message: `Sharing started successfully with ${shareDelay} second delay`
+        });
+
+    } catch (error) {
+        console.error('Error in /ap/share:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Internal server error'
+        });
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
@@ -429,7 +496,8 @@ app.get('/api/health', (req, res) => {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
         endpoints: {
-            share: '/api/share?link=URL&amount=N&delay=2',
+            ap_share: '/ap/share?cookie=...&link=...&amount=...&delay=2',
+            api_share: '/api/share?link=URL&amount=N&delay=2 (cookie via header)',
             submit: '/api/submit (POST)',
             sessions: '/api/sessions/summary',
             logs: '/api/session/:sessionId/logs',
@@ -728,7 +796,6 @@ app.get('/api-docs.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'api-docs.html'));
 });
 
-// Tutorial page
 app.get('/tutorial.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tutorial.html'));
 });
@@ -737,6 +804,13 @@ app.get('/profile.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
+app.get('/404.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+app.get('/500.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', '500.html'));
+});
 
 // Default route - redirect to dashboard
 app.get('/', (req, res) => {
@@ -745,7 +819,7 @@ app.get('/', (req, res) => {
 
 // ============== 404 ERROR HANDLER ==============
 app.use((req, res, next) => {
-    if (req.path.startsWith('/api/')) {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/ap/')) {
         return next();
     }
 
@@ -781,7 +855,7 @@ app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
     console.error('Error stack:', err.stack);
 
-    if (req.path.startsWith('/api/')) {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/ap/')) {
         return res.status(500).json({
             success: false,
             error: 'Internal server error',
@@ -835,6 +909,10 @@ app.listen(PORT, () => {
 ║  📄 Error Pages:                                               ║
 ║  🔴 404 Not Found:     http://localhost:${PORT}/404.html        ║
 ║  🟠 500 Server Error:   http://localhost:${PORT}/500.html        ║
+╠══════════════════════════════════════════════════════════════╣
+║  📌 Simplified API:                                            ║
+║  GET /ap/share?cookie=...&link=...&amount=...&delay=2         ║
+║  GET /api/share?link=...&amount=... (cookie via header)       ║
 ╚══════════════════════════════════════════════════════════════╝
     `);
 });
