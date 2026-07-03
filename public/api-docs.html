@@ -301,17 +301,6 @@
             font-weight: 600;
         }
         .endpoint .desc { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 8px; }
-        .endpoint .example {
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-top: 10px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #a5d6a7;
-            word-break: break-all;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
         .endpoint .params {
             margin-top: 10px;
             display: flex;
@@ -328,6 +317,210 @@
         }
         .endpoint .params .param .key { color: #ffb3ba; font-weight: 600; }
         .endpoint .params .param .required { color: #ff6b6b; margin-left: 4px; }
+
+        /* ===== TRY IT SECTION ===== */
+        .try-it {
+            margin-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 16px;
+        }
+        .try-it .toggle-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.7);
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .try-it .toggle-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .try-it .toggle-btn i { font-size: 0.8rem; }
+        .try-it .try-content {
+            display: none;
+            margin-top: 14px;
+            animation: fadeSlide 0.3s ease;
+        }
+        .try-it .try-content.open { display: block; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .try-content .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+        .try-content .input-group .field {
+            flex: 1;
+            min-width: 150px;
+        }
+        .try-content .input-group .field label {
+            display: block;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .try-content .input-group .field input,
+        .try-content .input-group .field textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-family: monospace;
+            font-size: 0.85rem;
+            transition: border-color 0.3s;
+        }
+        .try-content .input-group .field input:focus,
+        .try-content .input-group .field textarea:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+        .try-content .input-group .field textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .try-content .send-btn {
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, rgba(76,175,80,0.9), rgba(46,125,50,0.9));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .try-content .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+        }
+        .try-content .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Request URL display */
+        .request-url {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #81c784;
+            word-break: break-all;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .request-url .copy-btn {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .request-url .copy-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* Response display */
+        .response-area {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            max-height: 300px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .response-area pre {
+            margin: 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #e0e0e0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .response-area .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .response-area .response-header .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+        .response-area .response-header .status-badge.success {
+            background: rgba(76,175,80,0.2);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.2);
+        }
+        .response-area .response-header .status-badge.error {
+            background: rgba(244,67,54,0.2);
+            color: #ef9a9a;
+            border: 1px solid rgba(244,67,54,0.2);
+        }
+        .response-area .response-header .copy-response-btn {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .response-area .response-header .copy-response-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .response-area .loading-spinner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+        .response-area .loading-spinner i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .footer {
             text-align: center;
@@ -351,12 +544,15 @@
             #theme-button { width: 36px; height: 36px; font-size: 1.1rem; }
             .endpoint { padding: 16px; }
             .endpoint .path { font-size: 0.9rem; }
+            .try-content .input-group { flex-direction: column; }
+            .try-content .input-group .field { width: 100%; }
         }
         @media (max-width: 480px) {
             .glass-card { padding: 18px; }
             h1 { font-size: 22px; }
             .logo-icon { font-size: 30px; }
-            .endpoint .example { font-size: 0.7rem; }
+            .request-url { font-size: 0.7rem; }
+            .response-area pre { font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -411,11 +607,11 @@
                 <p class="tagline">Everything you need to integrate with ShareBoost</p>
             </div>
 
-            <!-- Base URL -->
+            <!-- Base URL - Dynamic -->
             <div class="glass-card fade-in">
                 <h2 style="color: white; font-size: 1.2rem; margin-bottom: 10px;"><i class="fas fa-link" style="color: #4caf50;"></i> Base URL</h2>
-                <div style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; font-family: monospace; color: #81c784; word-break: break-all;">
-                    http://localhost:5000/api
+                <div style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; font-family: monospace; color: #81c784; word-break: break-all;" id="baseUrlDisplay">
+                    Loading...
                 </div>
                 <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 6px;">All endpoints are relative to this base URL.</p>
             </div>
@@ -434,10 +630,110 @@
                         <span class="param"><span class="key">amount</span> <span class="required">*required</span> — Number of shares (1-10000)</span>
                         <span class="param"><span class="key">delay</span> — Delay between shares (seconds, default: 2)</span>
                     </div>
-                    <div class="example">
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
                         <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i>
                         GET /api/share?link=https://www.facebook.com/...&amp;amount=10&delay=2<br>
                         <span style="color: #64b5f6;">Header:</span> Cookie: sb=xxx; datr=xxx; ...
+                    </div>
+
+                    <!-- TRY IT SECTION -->
+                    <div class="try-it">
+                        <button class="toggle-btn" onclick="toggleTry(this)"><i class="fas fa-play"></i> Try it</button>
+                        <div class="try-content">
+                            <div class="input-group">
+                                <div class="field">
+                                    <label>Link (URL)</label>
+                                    <input type="text" id="shareLink" placeholder="https://www.facebook.com/..." value="https://www.facebook.com/photo.php?fbid=123456">
+                                </div>
+                                <div class="field">
+                                    <label>Amount</label>
+                                    <input type="number" id="shareAmount" placeholder="10" value="10" min="1" max="10000">
+                                </div>
+                                <div class="field">
+                                    <label>Delay (seconds)</label>
+                                    <input type="number" id="shareDelay" placeholder="2" value="2" min="1">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <div class="field" style="flex:2;">
+                                    <label>Cookie (optional – if not provided, use header)</label>
+                                    <textarea id="shareCookie" placeholder="sb=xxx; datr=xxx; ..."></textarea>
+                                </div>
+                            </div>
+                            <button class="send-btn" onclick="testShareEndpoint()"><i class="fas fa-paper-plane"></i> Send Request</button>
+                            <div id="shareRequestUrl" class="request-url" style="display:none;">
+                                <span id="shareUrlText"></span>
+                                <button class="copy-btn" onclick="copyText('shareUrlText')"><i class="fas fa-copy"></i> Copy</button>
+                            </div>
+                            <div id="shareResponse" class="response-area" style="display:none;">
+                                <div class="response-header">
+                                    <span id="shareStatusBadge" class="status-badge"></span>
+                                    <button class="copy-response-btn" onclick="copyResponse('shareResponse')"><i class="fas fa-copy"></i> Copy Response</button>
+                                </div>
+                                <pre id="shareResponseBody"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New /ap/share endpoint -->
+            <div class="glass-card fade-in">
+                <h2 style="color: white; font-size: 1.4rem; margin-bottom: 16px;"><i class="fas fa-bolt" style="color: #ffb74d;"></i> Simplified Share (All-in-One)</h2>
+                <div class="endpoint">
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="path">/ap/share</span>
+                    </div>
+                    <div class="desc">Start a sharing session with a single GET request. All parameters including cookie are passed in the query string.</div>
+                    <div class="params">
+                        <span class="param"><span class="key">cookie</span> <span class="required">*required</span> — Facebook cookie string (URL-encoded)</span>
+                        <span class="param"><span class="key">link</span> <span class="required">*required</span> — Facebook post URL</span>
+                        <span class="param"><span class="key">amount</span> <span class="required">*required</span> — Number of shares (1-10000)</span>
+                        <span class="param"><span class="key">delay</span> — Delay between shares (seconds, default: 2)</span>
+                    </div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i>
+                        GET /ap/share?cookie=sb%3Dxxx%3B%20datr%3Dxxx&link=https%3A%2F%2Fwww.facebook.com%2F...&amp;amount=10&delay=2
+                    </div>
+
+                    <!-- TRY IT SECTION -->
+                    <div class="try-it">
+                        <button class="toggle-btn" onclick="toggleTry(this)"><i class="fas fa-play"></i> Try it</button>
+                        <div class="try-content">
+                            <div class="input-group">
+                                <div class="field" style="flex:2;">
+                                    <label>Cookie (string)</label>
+                                    <textarea id="apCookie" placeholder="sb=xxx; datr=xxx; c_user=xxx; xs=xxx">sb=xxx; datr=xxx; c_user=xxx; xs=xxx</textarea>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <div class="field">
+                                    <label>Link (URL)</label>
+                                    <input type="text" id="apLink" placeholder="https://www.facebook.com/..." value="https://www.facebook.com/photo.php?fbid=123456">
+                                </div>
+                                <div class="field">
+                                    <label>Amount</label>
+                                    <input type="number" id="apAmount" placeholder="10" value="10" min="1" max="10000">
+                                </div>
+                                <div class="field">
+                                    <label>Delay (seconds)</label>
+                                    <input type="number" id="apDelay" placeholder="2" value="2" min="1">
+                                </div>
+                            </div>
+                            <button class="send-btn" onclick="testApShareEndpoint()"><i class="fas fa-paper-plane"></i> Send Request</button>
+                            <div id="apRequestUrl" class="request-url" style="display:none;">
+                                <span id="apUrlText"></span>
+                                <button class="copy-btn" onclick="copyText('apUrlText')"><i class="fas fa-copy"></i> Copy</button>
+                            </div>
+                            <div id="apResponse" class="response-area" style="display:none;">
+                                <div class="response-header">
+                                    <span id="apStatusBadge" class="status-badge"></span>
+                                    <button class="copy-response-btn" onclick="copyResponse('apResponse')"><i class="fas fa-copy"></i> Copy Response</button>
+                                </div>
+                                <pre id="apResponseBody"></pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -454,37 +750,49 @@
                         <span class="param"><span class="key">url</span> <span class="required">*required</span> — Post URL</span>
                         <span class="param"><span class="key">amount</span> <span class="required">*required</span> — Shares (1-10000)</span>
                     </div>
-                    <div class="example"><i class="fas fa-code" style="color: #4caf50; margin-right: 8px;"></i> POST /api/submit { "cookie": "...", "url": "...", "amount": 10 }</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-code" style="color: #4caf50; margin-right: 8px;"></i> POST /api/submit { "cookie": "...", "url": "...", "amount": 10 }
+                    </div>
                 </div>
 
                 <div class="endpoint">
                     <div><span class="method get">GET</span> <span class="path">/sessions/summary</span></div>
                     <div class="desc">Get summary of all active and completed sessions.</div>
-                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/sessions/summary</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/sessions/summary
+                    </div>
                 </div>
 
                 <div class="endpoint">
                     <div><span class="method get">GET</span> <span class="path">/session/:sessionId/logs</span></div>
                     <div class="desc">Retrieve logs for a specific session.</div>
-                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/session/abc123/logs</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/session/abc123/logs
+                    </div>
                 </div>
 
                 <div class="endpoint">
                     <div><span class="method delete">DELETE</span> <span class="path">/session/:sessionId</span></div>
                     <div class="desc">Stop a running session.</div>
-                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> DELETE /api/session/abc123</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> DELETE /api/session/abc123
+                    </div>
                 </div>
 
                 <div class="endpoint">
                     <div><span class="method get">GET</span> <span class="path">/tiktok/random</span></div>
                     <div class="desc">Get a random TikTok video URL.</div>
-                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/tiktok/random</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style: "color: #4caf50; margin-right: 8px;"></i> GET /api/tiktok/random
+                    </div>
                 </div>
 
                 <div class="endpoint">
                     <div><span class="method get">GET</span> <span class="path">/health</span></div>
                     <div class="desc">Check server health and active sessions.</div>
-                    <div class="example"><i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/health</div>
+                    <div class="example" style="background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px 16px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #a5d6a7; word-break: break-all; border: 1px solid rgba(255,255,255,0.05);">
+                        <i class="fas fa-terminal" style="color: #4caf50; margin-right: 8px;"></i> GET /api/health
+                    </div>
                 </div>
             </div>
 
@@ -507,7 +815,11 @@
     </div>
 
     <script>
-        // Sidebar
+        // ===== SET BASE URL =====
+        const baseUrl = window.location.origin + '/api';
+        document.getElementById('baseUrlDisplay').textContent = baseUrl;
+
+        // ===== SIDEBAR =====
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
@@ -528,7 +840,7 @@
             }
         });
 
-        // Theme
+        // ===== THEME =====
         const themeBtn = document.getElementById('theme-button');
         const saved = localStorage.getItem('shareboost-theme');
         if (saved === 'dark') { document.body.classList.add('dark-mode'); themeBtn.className = 'fas fa-sun'; }
@@ -539,7 +851,7 @@
             localStorage.setItem('shareboost-theme', isDark ? 'dark' : 'light');
         });
 
-        // Greeting Modal
+        // ===== GREETING MODAL =====
         function showGreetingModal() {
             const modal = document.getElementById('greetingModal');
             const now = new Date();
@@ -549,7 +861,7 @@
         }
         function closeGreetingModal() { document.getElementById('greetingModal').classList.remove('show'); }
 
-        // Fade-in
+        // ===== FADE-IN =====
         function handleScroll() {
             document.querySelectorAll('.fade-in').forEach(el => {
                 if (el.getBoundingClientRect().top < window.innerHeight - 80) el.classList.add('visible');
@@ -560,6 +872,167 @@
             setTimeout(showGreetingModal, 500);
             handleScroll();
         });
+
+        // ===== TRY IT TOGGLE =====
+        function toggleTry(btn) {
+            const content = btn.parentElement.querySelector('.try-content');
+            content.classList.toggle('open');
+            btn.innerHTML = content.classList.contains('open') ? '<i class="fas fa-times"></i> Close' : '<i class="fas fa-play"></i> Try it';
+        }
+
+        // ===== COPY FUNCTIONS =====
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector(`#${elementId}`).parentElement.querySelector('.copy-btn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => btn.innerHTML = original, 1500);
+            }).catch(() => {
+                // fallback
+                const text = document.getElementById(elementId).innerText;
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                const btn = document.querySelector(`#${elementId}`).parentElement.querySelector('.copy-btn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => btn.innerHTML = original, 1500);
+            });
+        }
+
+        function copyResponse(divId) {
+            const pre = document.querySelector(`#${divId} pre`);
+            if (!pre) return;
+            const text = pre.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector(`#${divId} .copy-response-btn`);
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => btn.innerHTML = original, 1500);
+            }).catch(() => {
+                const text = pre.innerText;
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                const btn = document.querySelector(`#${divId} .copy-response-btn`);
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => btn.innerHTML = original, 1500);
+            });
+        }
+
+        // ===== TEST /api/share =====
+        async function testShareEndpoint() {
+            const link = document.getElementById('shareLink').value.trim();
+            const amount = document.getElementById('shareAmount').value.trim();
+            const delay = document.getElementById('shareDelay').value.trim();
+            const cookie = document.getElementById('shareCookie').value.trim();
+
+            if (!link || !amount) {
+                alert('Link and Amount are required.');
+                return;
+            }
+
+            const url = `${baseUrl}/share?link=${encodeURIComponent(link)}&amount=${encodeURIComponent(amount)}&delay=${encodeURIComponent(delay || 2)}`;
+            const requestUrlDiv = document.getElementById('shareRequestUrl');
+            document.getElementById('shareUrlText').textContent = url;
+            requestUrlDiv.style.display = 'flex';
+
+            const responseDiv = document.getElementById('shareResponse');
+            const statusBadge = document.getElementById('shareStatusBadge');
+            const responseBody = document.getElementById('shareResponseBody');
+
+            responseDiv.style.display = 'block';
+            statusBadge.textContent = 'Sending...';
+            statusBadge.className = 'status-badge';
+            responseBody.textContent = '';
+
+            try {
+                const headers = {};
+                if (cookie) {
+                    headers['Cookie'] = cookie;
+                    headers['x-cookie'] = cookie;
+                }
+
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = await res.json();
+                const pretty = JSON.stringify(data, null, 2);
+                responseBody.textContent = pretty;
+
+                if (res.ok) {
+                    statusBadge.textContent = `${res.status} OK`;
+                    statusBadge.className = 'status-badge success';
+                } else {
+                    statusBadge.textContent = `${res.status} Error`;
+                    statusBadge.className = 'status-badge error';
+                }
+            } catch (error) {
+                responseBody.textContent = 'Error: ' + error.message;
+                statusBadge.textContent = 'Request Failed';
+                statusBadge.className = 'status-badge error';
+            }
+        }
+
+        // ===== TEST /ap/share =====
+        async function testApShareEndpoint() {
+            const cookie = document.getElementById('apCookie').value.trim();
+            const link = document.getElementById('apLink').value.trim();
+            const amount = document.getElementById('apAmount').value.trim();
+            const delay = document.getElementById('apDelay').value.trim();
+
+            if (!cookie || !link || !amount) {
+                alert('Cookie, Link, and Amount are required.');
+                return;
+            }
+
+            const base = window.location.origin;
+            const url = `${base}/ap/share?cookie=${encodeURIComponent(cookie)}&link=${encodeURIComponent(link)}&amount=${encodeURIComponent(amount)}&delay=${encodeURIComponent(delay || 2)}`;
+            const requestUrlDiv = document.getElementById('apRequestUrl');
+            document.getElementById('apUrlText').textContent = url;
+            requestUrlDiv.style.display = 'flex';
+
+            const responseDiv = document.getElementById('apResponse');
+            const statusBadge = document.getElementById('apStatusBadge');
+            const responseBody = document.getElementById('apResponseBody');
+
+            responseDiv.style.display = 'block';
+            statusBadge.textContent = 'Sending...';
+            statusBadge.className = 'status-badge';
+            responseBody.textContent = '';
+
+            try {
+                const res = await fetch(url, {
+                    method: 'GET'
+                });
+
+                const data = await res.json();
+                const pretty = JSON.stringify(data, null, 2);
+                responseBody.textContent = pretty;
+
+                if (res.ok) {
+                    statusBadge.textContent = `${res.status} OK`;
+                    statusBadge.className = 'status-badge success';
+                } else {
+                    statusBadge.textContent = `${res.status} Error`;
+                    statusBadge.className = 'status-badge error';
+                }
+            } catch (error) {
+                responseBody.textContent = 'Error: ' + error.message;
+                statusBadge.textContent = 'Request Failed';
+                statusBadge.className = 'status-badge error';
+            }
+        }
     </script>
 </body>
 </html>
